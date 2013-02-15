@@ -1,0 +1,29 @@
+{
+    "name": "iresults/renderer",
+    "description": "iresults interface to the PHPWord package",
+    "require": {
+        "lrobert/phpword": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/lrobert/PHPWord.git"
+        }
+    ],
+    "license": ["MIT"],
+    "type": "library",
+    "authors": [
+        {
+            "name": "Daniel Corn",
+            "email": "cod@iresults.li"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Iresults\\Renderer": "Classes/"
+        }
+    },
+    "minimum-stability": "dev"
+}
+
+
