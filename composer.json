@@ -1,6 +1,6 @@
 {
     "name": "iresults/renderer",
-    "description": "iresults interface to the PHPWord package",
+    "description": "iresults interface to PHP office packages",
     "license": ["MIT"],
     "type": "library",
     "authors": [
