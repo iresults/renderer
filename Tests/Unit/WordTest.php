@@ -46,40 +46,68 @@ namespace Iresults\Renderer\Tests\Unit\Word;
 
 
 use Iresults\Renderer\Word\Renderer;
+use org\bovigo\vfs\vfsStream;
 
 class WordTest extends \PHPUnit_Framework_TestCase {
+	/**
+     * The path the test file will be saved to
+     * @type  string
+     */
+    protected $savePath;
+
+    /**
+     * Set up the test environment
+     */
+	public function setUp() {
+		$this->savePath = tempnam(sys_get_temp_dir(), 'IWR');
+	}
+
+	/**
+	 * Remove the temporary file
+	 */
+	public function tearDown() {
+		unlink($this->savePath);
+	}
+
 	/**
 	 * @test
 	 */
 	public function createDocument() {
-		$savePath = tempnam(sys_get_temp_dir(), 'IWR');
 		$document = new Renderer();
 		$document->getContext()->addText('Hello world!');
-		$document->save($savePath);
-		$this->assertTrue(file_exists($savePath));
+		$document->save($this->savePath);
+
+		$this->assertTrue(file_exists($this->savePath));
 	}
 
 	/**
 	 * @test
 	 */
 	public function createDocumentFromTemplate() {
-		$savePath = tempnam(sys_get_temp_dir(), 'IWR');
-		$savePath = __DIR__ . '/test.docx';
-
+		/**
+		 * The renderer that encapsulates the template instance
+		 * @var Iresults\Renderer\Word\Renderer
+		 */
 		$document = Renderer::rendererWithTemplate(__DIR__ . '/reference.docx');
+
+		// Assign variables through the context
+		$document->getContext()->assign('time', date('r'));
+		$document->getContext()->assign('some', 5);
 
 		$author = new \stdClass();
 		$author->firstName = 'Ægir';
 		$author->lastName = 'Jørgensen';
 
+		/*
+		 * The document should automatically forward unknown method calls to the
+		 * context or the driver
+		 */
 		$document->assign('author', $author);
-		$document->getContext()->assign('time', date('r'));
-		$document->getContext()->assign('some', 5);
 
-		#$document->getContext()->setValue('name', 'Smöre ”Bröd”');
-		#$document->getContext()->setValue('name', 'Daniel');
-		$document->save($savePath);
-		$this->assertTrue(file_exists($savePath));
+
+		$document->save($this->savePath);
+		$this->assertTrue(file_exists($this->savePath));
+
 	}
 }
 

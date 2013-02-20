@@ -70,20 +70,74 @@ class Template extends \PHPWord_Template {
     protected $templateVariableContainer = array();
 
     /**
+     * Messages for ZIP constants
+     * @var array
+     */
+    static protected $zipConstants = array(
+        \ZIPARCHIVE::CREATE              => 'Create the archive if it does not exist.',
+        \ZIPARCHIVE::OVERWRITE           => 'Always start a new archive, this mode will overwrite the file if it already exists.',
+        \ZIPARCHIVE::EXCL                => 'Error if archive already exists.',
+        \ZIPARCHIVE::CHECKCONS           => 'Perform additional consistency checks on the archive, and error if they fail.',
+        \ZIPARCHIVE::FL_NOCASE           => 'Ignore case on name lookup',
+        \ZIPARCHIVE::FL_NODIR            => 'Ignore directory component',
+        \ZIPARCHIVE::FL_COMPRESSED       => 'Read compressed data',
+        \ZIPARCHIVE::FL_UNCHANGED        => 'Use original data, ignoring changes.',
+        \ZIPARCHIVE::CM_DEFAULT          => 'better of deflate or store.',
+        \ZIPARCHIVE::CM_STORE            => 'stored (uncompressed).',
+        \ZIPARCHIVE::CM_SHRINK           => 'shrunk',
+        \ZIPARCHIVE::CM_REDUCE_1         => 'reduced with factor 1',
+        \ZIPARCHIVE::CM_REDUCE_2         => 'reduced with factor 2',
+        \ZIPARCHIVE::CM_REDUCE_3         => 'reduced with factor 3',
+        \ZIPARCHIVE::CM_REDUCE_4         => 'reduced with factor 4',
+        \ZIPARCHIVE::CM_IMPLODE          => 'imploded',
+        \ZIPARCHIVE::CM_DEFLATE          => 'deflated',
+        \ZIPARCHIVE::CM_DEFLATE64        => 'deflate64',
+        \ZIPARCHIVE::CM_PKWARE_IMPLODE   => 'PKWARE imploding',
+        \ZIPARCHIVE::CM_BZIP2            => 'BZIP2 algorithm',
+        \ZIPARCHIVE::ER_OK               => 'No error.',
+        \ZIPARCHIVE::ER_MULTIDISK        => 'Multi-disk zip archives not supported.',
+        \ZIPARCHIVE::ER_RENAME           => 'Renaming temporary file failed.',
+        \ZIPARCHIVE::ER_CLOSE            => 'Closing zip archive failed',
+        \ZIPARCHIVE::ER_SEEK             => 'Seek error',
+        \ZIPARCHIVE::ER_READ             => 'Read error',
+        \ZIPARCHIVE::ER_WRITE            => 'Write error',
+        \ZIPARCHIVE::ER_CRC              => 'CRC error',
+        \ZIPARCHIVE::ER_ZIPCLOSED        => 'Containing zip archive was closed',
+        \ZIPARCHIVE::ER_NOENT            => 'No such file.',
+        \ZIPARCHIVE::ER_EXISTS           => 'File already exists',
+        \ZIPARCHIVE::ER_OPEN             => 'Can\'t open file',
+        \ZIPARCHIVE::ER_TMPOPEN          => 'Failure to create temporary file.',
+        \ZIPARCHIVE::ER_ZLIB             => 'Zlib error',
+        \ZIPARCHIVE::ER_MEMORY           => 'Memory allocation failure',
+        \ZIPARCHIVE::ER_CHANGED          => 'Entry has been changed',
+        \ZIPARCHIVE::ER_COMPNOTSUPP      => 'Compression method not supported.',
+        \ZIPARCHIVE::ER_EOF              => 'Premature EOF',
+        \ZIPARCHIVE::ER_INVAL            => 'Invalid argument',
+        \ZIPARCHIVE::ER_NOZIP            => 'Not a zip archive',
+        \ZIPARCHIVE::ER_INTERNAL         => 'Internal error',
+        \ZIPARCHIVE::ER_INCONS           => 'Zip archive inconsistent',
+        \ZIPARCHIVE::ER_REMOVE           => 'Can\'t remove file',
+        \ZIPARCHIVE::ER_DELETED          => 'Entry has been deleted'
+    );
+
+    /**
      * Create a new Template Object
      *
      * @param string $strFilename
      */
     public function __construct($strFilename) {
-        $path = dirname($strFilename);
-        $this->tempFileName = $path . DIRECTORY_SEPARATOR . time() . '.docx';
-
-        copy($strFilename, $this->tempFileName); // Copy the source File to the temp File
-
-
+        $this->tempFileName = \Iresults\Core\Iresults::getTempPath() . str_replace('.', '_', basename($strFilename)) . '_' . time() . '.docx';
         $this->zipArchive = new \ZipArchive();
-        $this->zipArchive->open($this->tempFileName);
 
+        if (!copy($strFilename, $this->tempFileName)) {
+            throw new \UnexpectedValueException('Could not copy file "' . $strFilename . '" to temporary path "' . $this->tempFileName . '"', 1361205476);
+        }
+
+        $successfullyOpened = $this->zipArchive->open($this->tempFileName);
+        if ($successfullyOpened !== TRUE) {
+            $message = 'Error opening file "' . $this->tempFileName . '": ' . self::$zipConstants[$successfullyOpened];
+            throw new \UnexpectedValueException($message, 1361205476);
+        }
         $this->documentXML = $this->zipArchive->getFromName('word/document.xml');
     }
 
@@ -134,6 +188,31 @@ class Template extends \PHPWord_Template {
     }
 
     /**
+     * Hard replace the given search string with the data from replace
+     *
+     * Normally you should use assign() instead
+     *
+     * @param mixed $search
+     * @param mixed $replace
+     * @param boolean $regularExpression If set to TRUE preg_replace() will be used instead of str_replace()
+     */
+    public function replaceString($search, $replace, $regularExpression = FALSE) {
+        if ($regularExpression) {
+            $this->documentXML = preg_replace($search, $replace, $this->documentXML);
+        } else {
+            $this->documentXML = str_replace($search, $replace, $this->documentXML);
+        }
+    }
+
+    /**
+     * Returns the templates document XML data
+     * @return string
+     */
+    public function getDocumentXML() {
+        return $this->documentXML;
+    }
+
+    /**
      * Tries to fetch the value for the given key path
      *
      * The entry point is the first part of the key path, which is the array key
@@ -146,7 +225,7 @@ class Template extends \PHPWord_Template {
         if ($keyPath[0] === '{') {
             $keyPath = substr($keyPath, 1, -1);
         }
-        return \Tx_Iresults_Helpers_ObjectHelper::getObjectForKeyPathOfObject($keyPath, $this->templateVariableContainer, TRUE);
+        return \Iresults\Core\Helpers\ObjectHelper::getObjectForKeyPathOfObject($keyPath, $this->templateVariableContainer, TRUE);
     }
 
     /**
@@ -165,11 +244,16 @@ class Template extends \PHPWord_Template {
             }
         }
 
+        $destinationDirectory = dirname($strFilename);
+        if (!is_writable($destinationDirectory)) {
+            throw new \UnexpectedValueException('Destination file directory "' . $destinationDirectory . '" is not writeable', 1361203866);
+        }
 
         // Remove the destination, if it already exists
         if (file_exists($strFilename)) {
             unlink($strFilename);
         }
+
 
         $this->zipArchive->addFromString('word/document.xml', $documentXmlLocal);
 
@@ -178,7 +262,9 @@ class Template extends \PHPWord_Template {
             throw new \Exception('Could not close zip file.', 1360944963);
         }
 
-        rename($this->tempFileName, $strFilename);
+        if (!rename($this->tempFileName, $strFilename)) {
+            throw new \UnexpectedValueException('Could not move file "' . $this->tempFileName . '" to destination path "' . $strFilename . '"', 1361264101);
+        }
         $this->documentXML = $documentXmlLocal;
     }
 

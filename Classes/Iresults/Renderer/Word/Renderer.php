@@ -83,6 +83,7 @@ class Renderer extends AbstractRenderer {
 	 * @return AbstractRenderer
 	 */
 	public function initWithTemplate($templateFilePath) {
+		$templateFilePath = \Iresults\Core\Iresults::getPathOfResource($templateFilePath);
 		if (!is_readable($templateFilePath)) {
 			throw new \UnexpectedValueException('Template file "' . $templateFilePath . '" is not readable', 1360939616);
 		}

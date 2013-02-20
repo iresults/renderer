@@ -28,13 +28,15 @@ namespace Iresults\Renderer;
  * @version    1.0.0
  */
 
+use Iresults\Core\Model;
+
 /**
  * The abstract class for the renderers
  *
  * @author	Daniel Corn <cod@iresults.li>
  * @package	Iresults\Word
  */
-abstract class AbstractRenderer extends \Tx_Iresults_Model {
+abstract class AbstractRenderer extends Model {
 	/**
 	 * @var string The path the file will be saved.
 	 */
@@ -74,7 +76,6 @@ abstract class AbstractRenderer extends \Tx_Iresults_Model {
 	}
 
 
-
 	/* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
 	/* FACTORY METHODS           MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
 	/* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
@@ -87,7 +88,6 @@ abstract class AbstractRenderer extends \Tx_Iresults_Model {
 		$renderer = new static();
 		return $renderer->initWithTemplate($templateFilePath);
 	}
-
 
 
 	/* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
@@ -190,7 +190,6 @@ abstract class AbstractRenderer extends \Tx_Iresults_Model {
 		}
 		return parent::__call($name, $arguments);
 	}
-
 
 
 	/* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
