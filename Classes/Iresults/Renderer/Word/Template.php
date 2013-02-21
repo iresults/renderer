@@ -126,6 +126,10 @@ class Template extends \PHPWord_Template {
      * @param string $strFilename
      */
     public function __construct($strFilename) {
+        if (defined('ZIPARCHIVE::CM_BZIP2') && !isset(static::$zipConstants[12])) {
+            static::$zipConstants[12] = 'BZIP2 algorithm';
+        }
+
         $this->tempFileName = \Iresults\Core\Iresults::getTempPath() . str_replace('.', '_', basename($strFilename)) . '_' . time() . '.docx';
         $this->zipArchive = new \ZipArchive();
 
