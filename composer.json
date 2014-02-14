@@ -10,7 +10,6 @@
         }
     ],
     "require": {
-        "lrobert/phpword": "dev-master",
         "iresults/core": "*"
     },
     "repositories": [
@@ -27,6 +26,9 @@
         "psr-0": {
             "Iresults\\Renderer": "Classes/"
         }
+    },
+    "suggest": {
+        "lrobert/phpword": "Allows Word Doc rendering"
     },
     "minimum-stability": "dev"
 }
