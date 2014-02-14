@@ -36,14 +36,14 @@ use Iresults\Core\Model;
  * @author	Daniel Corn <cod@iresults.li>
  * @package	Iresults\Word
  */
-abstract class AbstractRenderer extends Model {
+abstract class AbstractRenderer extends Model implements RendererInterface {
 	/**
 	 * @var string The path the file will be saved.
 	 */
 	protected $savePath = '';
 
 	/**
-	 * The underlaying object responsible for rendering
+	 * The underlying object responsible for rendering
 	 * @var PHPWord
 	 */
 	protected $driver = NULL;
@@ -64,7 +64,7 @@ abstract class AbstractRenderer extends Model {
 	 * The constructor
 	 *
 	 * @param	array   $parameters
-	 * @return	Iresults\Word\AbstractRenderer
+	 * @return	AbstractRenderer
 	 */
 	public function __construct(array $parameters = array()) {
 		parent::__construct($parameters);
@@ -85,6 +85,7 @@ abstract class AbstractRenderer extends Model {
 	 * @return AbstractRenderer
 	 */
 	static public function rendererWithTemplate($templateFilePath) {
+		/** @var AbstractRenderer $renderer */
 		$renderer = new static();
 		return $renderer->initWithTemplate($templateFilePath);
 	}
@@ -148,6 +149,7 @@ abstract class AbstractRenderer extends Model {
 	 * Sets the path the file will be saved at
 	 *
 	 * @param String $savePath
+	 * @return $this
 	 */
 	public function setSavePath($savePath) {
 	    $this->savePath = $savePath;
@@ -167,6 +169,7 @@ abstract class AbstractRenderer extends Model {
 	 * Set the current rendering context
 	 *
 	 * @param PHPWord_Section $context
+	 * @return $this
 	 */
 	public function setContext($context) {
 	    $this->context = $context;
@@ -179,7 +182,6 @@ abstract class AbstractRenderer extends Model {
 	 * @param	string	$name		The originally called method
 	 * @param	array	$arguments	The arguments passed to the original method
 	 * @return	mixed
-	 * @throws	BadMethodCallException	If no dynamic method was found
 	 */
 	public function __call($name, array $arguments) {
 		if (method_exists($this->getDriver(), $name)) {
