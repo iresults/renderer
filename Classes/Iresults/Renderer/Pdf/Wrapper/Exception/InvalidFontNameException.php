@@ -26,18 +26,12 @@
 
 /**
  * @author COD
- * Created 14.02.14 16:18
+ * Created 17.02.14 13:27
  */
 
+namespace Iresults\Renderer\Pdf\Wrapper\Exception;
 
-namespace Iresults\Renderer\Pdf\Wrapper;
-use Iresults\Renderer\Exception;
+use Iresults\Renderer\Exception\FontException;
 
-/**
- * Exception to capture library errors
- *
- * @package Iresults\Renderer\Pdf\Wrapper
- */
-class WrapperException extends Exception {
-
+class InvalidFontNameException extends FontException {
 }

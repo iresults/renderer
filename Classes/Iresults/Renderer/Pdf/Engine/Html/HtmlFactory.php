@@ -53,7 +53,7 @@ class HtmlFactory extends AbstractFactory {
 	 */
 	static protected function _getFactoryClass() {
 		if (class_exists('mPDF')) {
-			return 'Tx_Iresults_Renderer_Pdf_Engine_Html_Mpdf';
+			return 'Iresults\\Renderer\\Pdf\\Engine\\Html\\MpdfHtml';
 		}
 		return FALSE;
 	}

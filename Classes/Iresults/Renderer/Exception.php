@@ -26,18 +26,18 @@
 
 /**
  * @author COD
- * Created 14.02.14 16:18
+ * Created 17.02.14 13:23
  */
 
 
-namespace Iresults\Renderer\Pdf\Wrapper;
-use Iresults\Renderer\Exception;
+namespace Iresults\Renderer;
+
+use Exception as BaseException;
 
 /**
- * Exception to capture library errors
+ * Renderer exceptions
  *
- * @package Iresults\Renderer\Pdf\Wrapper
+ * @package Iresults\Renderer
  */
-class WrapperException extends Exception {
-
+class Exception extends BaseException {
 }

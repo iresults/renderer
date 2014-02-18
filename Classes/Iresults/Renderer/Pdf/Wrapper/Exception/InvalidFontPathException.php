@@ -1,10 +1,8 @@
 <?php
-namespace Iresults\Renderer\Pdf\Engine\Html;
-
 /*
  *  Copyright notice
  *
- *  (c) 2013 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
+ *  (c) 2014 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
  *  Daniel Corn <cod@iresults.li>, iresults
  *
  *  All rights reserved
@@ -25,33 +23,15 @@ namespace Iresults\Renderer\Pdf\Engine\Html;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
-use Iresults\Renderer\Pdf\Wrapper\Mpdf as BaseMpdf;
 
 /**
  * @author COD
- * Created 09.10.13 10:43
+ * Created 17.02.14 13:27
  */
 
-class Mpdf extends AbstractHtml {
-	/**
-	 * Render the PDF
-	 */
-	protected function _render() {
-		$this->getContext()->WriteHTML($this->getStyles(), 1);
-		$this->getContext()->WriteHTML($this->getTemplate(), 2);
-	}
+namespace Iresults\Renderer\Pdf\Wrapper\Exception;
 
-	/**
-	 * Returns the current rendering context (i.e. a section or page)
-	 *
-	 * @return mixed
-	 */
-	public function getContext() {
-		if (!$this->context) {
-			$this->context = new BaseMpdf();
-			$this->context->SetDisplayMode('fullpage');
-			$this->context->list_indent_first_level = 0;    // 1 or 0 - whether to indent the first level of a list
-		}
-		return $this->context;
-	}
+use Iresults\Renderer\Exception\FontException;
+
+class InvalidFontPathException extends FontException {
 }

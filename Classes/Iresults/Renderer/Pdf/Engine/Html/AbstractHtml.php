@@ -36,7 +36,7 @@ abstract class AbstractHtml implements HtmlInterface {
 	/**
 	 * Drawing context
 	 *
-	 * @var mPdf
+	 * @var MpdfHtml|object
 	 */
 	protected $context;
 

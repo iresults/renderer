@@ -1,8 +1,10 @@
 <?php
+namespace Iresults\Renderer\Pdf\Engine\Html;
+
 /*
  *  Copyright notice
  *
- *  (c) 2014 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
+ *  (c) 2013 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
  *  Daniel Corn <cod@iresults.li>, iresults
  *
  *  All rights reserved
@@ -23,21 +25,33 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
+use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper as MpdfWrapper;
 
 /**
  * @author COD
- * Created 14.02.14 16:18
+ * Created 09.10.13 10:43
  */
 
+class MpdfHtml extends AbstractHtml {
+	/**
+	 * Render the PDF
+	 */
+	protected function _render() {
+		$this->getContext()->WriteHTML($this->getStyles(), 1);
+		$this->getContext()->WriteHTML($this->getTemplate(), 2);
+	}
 
-namespace Iresults\Renderer\Pdf\Wrapper;
-use Iresults\Renderer\Exception;
-
-/**
- * Exception to capture library errors
- *
- * @package Iresults\Renderer\Pdf\Wrapper
- */
-class WrapperException extends Exception {
-
+	/**
+	 * Returns the current rendering context (i.e. a section or page)
+	 *
+	 * @return mixed
+	 */
+	public function getContext() {
+		if (!$this->context) {
+			$this->context = new MpdfWrapper();
+			$this->context->SetDisplayMode('fullpage');
+			$this->context->list_indent_first_level = 0;    // 1 or 0 - whether to indent the first level of a list
+		}
+		return $this->context;
+	}
 }

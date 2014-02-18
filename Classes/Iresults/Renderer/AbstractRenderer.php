@@ -49,7 +49,7 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 	protected $driver = NULL;
 
 	/**
-	 * The current context of the rendering (i.e. a section)
+	 * The current context of the rendering (i.e. a section, a page)
 	 * @var PHPWord_Section
 	 */
 	protected $context = NULL;

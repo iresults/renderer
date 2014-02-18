@@ -26,21 +26,17 @@
 
 /**
  * @author COD
- * Created 14.02.14 16:17
+ * Created 17.02.14 13:22
  */
 
+namespace Iresults\Renderer\Exception;
 
-namespace Iresults\Renderer\Pdf\Wrapper;
-
-use mPDF as BaseMpdf;
+use Iresults\Renderer\Exception;
 
 /**
- * Wrapper class for the mPDF library
+ * Font related exception
  *
- * @package Iresults\Renderer\Pdf\Wrapper
+ * @package Iresults\Renderer\Exception
  */
-class Mpdf extends BaseMpdf {
-	function Error($msg) {
-		throw new WrapperException($msg);
-	}
+class FontException extends Exception {
 }
