@@ -110,4 +110,11 @@ interface HtmlInterface extends RendererInterface {
 	 * @return string
 	 */
 	public function getStylesPath();
+
+	/**
+	 * Renders the template
+	 *
+	 * @return void
+	 */
+	public function render();
 }

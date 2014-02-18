@@ -76,6 +76,12 @@ abstract class AbstractHtml implements HtmlInterface {
 	protected $styles = '';
 
 	/**
+	 * Defines if the template needs to be rendered
+	 * @var bool
+	 */
+	protected $_needsToRender = TRUE;
+
+	/**
 	 * Render the PDF
 	 */
 	abstract protected function _render();
@@ -102,7 +108,7 @@ abstract class AbstractHtml implements HtmlInterface {
 		if (!$savePath) {
 			$savePath = $this->getSavePath();
 		}
-		$this->_render();
+		$this->render();
 		$this->getContext()->Output($savePath, 'F');
 	}
 
@@ -117,8 +123,20 @@ abstract class AbstractHtml implements HtmlInterface {
 		if (!$name) {
 			$name = basename($this->getSavePath());
 		}
-		$this->_render();
+		$this->render();
 		$this->getContext()->Output($name, 'D');
+	}
+
+	/**
+	 * Render the template
+	 *
+	 * @return void
+	 */
+	public function render() {
+		if ($this->_needsToRender) {
+			$this->_render();
+			$this->_needsToRender = FALSE;
+		}
 	}
 
 	/**
@@ -148,6 +166,7 @@ abstract class AbstractHtml implements HtmlInterface {
 	 * @return $this
 	 */
 	public function setContext($context) {
+		$this->_needsToRender = TRUE;
 		$this->context = $context;
 		return $this;
 	}
@@ -173,6 +192,7 @@ abstract class AbstractHtml implements HtmlInterface {
 	 * @return $this
 	 */
 	public function setTemplate($template) {
+		$this->_needsToRender = TRUE;
 		$this->template = $template;
 		return $this;
 	}
@@ -184,6 +204,7 @@ abstract class AbstractHtml implements HtmlInterface {
 	 * @return $this
 	 */
 	public function setTemplatePath($templatePath) {
+		$this->_needsToRender = TRUE;
 		$this->templatePath = $templatePath;
 		return $this;
 	}
@@ -204,6 +225,8 @@ abstract class AbstractHtml implements HtmlInterface {
 	 * @return $this
 	 */
 	public function setStyles($styles) {
+		$this->_needsToRender = TRUE;
+
 		$this->styles = $styles;
 		if (file_exists($styles)) {
 			$styles = file_get_contents($styles);
@@ -233,6 +256,8 @@ abstract class AbstractHtml implements HtmlInterface {
 	 * @return $this
 	 */
 	public function setStylesPath($stylesPath) {
+		$this->_needsToRender = TRUE;
+
 		$this->stylesPath = $stylesPath;
 		return $this;
 	}
