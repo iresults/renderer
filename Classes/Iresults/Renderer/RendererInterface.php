@@ -25,6 +25,7 @@ namespace Iresults\Renderer;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
+use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
 
 /**
  * @author COD
@@ -71,14 +72,14 @@ interface RendererInterface {
 	/**
 	 * Returns the current rendering context (i.e. a section or page)
 	 *
-	 * @return mixed
+	 * @return object|MpdfWrapper|\PHPWord_Section
 	 */
 	public function getContext();
 
 	/**
 	 * Set the current rendering context (i.e. a section or page)
 	 *
-	 * @param mixed $context
+	 * @param object|MpdfWrapper|\PHPWord_Section $context
 	 */
 	public function setContext($context);
 }

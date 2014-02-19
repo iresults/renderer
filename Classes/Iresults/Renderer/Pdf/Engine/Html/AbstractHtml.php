@@ -123,6 +123,9 @@ abstract class AbstractHtml implements HtmlInterface {
 		if (!$name) {
 			$name = basename($this->getSavePath());
 		}
+
+		$this->sendHeaders($name, $type);
+
 		$this->render();
 		$this->getContext()->Output($name, 'D');
 	}
@@ -269,5 +272,16 @@ abstract class AbstractHtml implements HtmlInterface {
 	 */
 	public function getStylesPath() {
 		return $this->stylesPath;
+	}
+
+	/**
+	 * Sends the headers for direct output of the rendered data.
+	 *
+	 * @param	string $name	This appears as the name of the downloaded file
+	 * @param   string $type	Type for which to send the header
+	 * @return	boolean Returns TRUE if the headers are successfully sent, else FALSE
+	 */
+	public function sendHeaders($name, $type = NULL) {
+		// Will be sent by mPDF
 	}
 }

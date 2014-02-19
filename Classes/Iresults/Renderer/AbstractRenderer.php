@@ -29,6 +29,7 @@ namespace Iresults\Renderer;
  */
 
 use Iresults\Core\Model;
+use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
 
 /**
  * The abstract class for the renderers
@@ -44,13 +45,13 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 
 	/**
 	 * The underlying object responsible for rendering
-	 * @var PHPWord
+	 * @var object|MpdfWrapper|\PHPWord
 	 */
 	protected $driver = NULL;
 
 	/**
 	 * The current context of the rendering (i.e. a section, a page)
-	 * @var PHPWord_Section
+	 * @var object|MpdfWrapper|\PHPWord_Section
 	 */
 	protected $context = NULL;
 
@@ -130,7 +131,7 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 
 	/**
 	 * Returns the driver instance
-	 * @return PHPWord
+	 * @return object|MpdfWrapper|\PHPWord
 	 */
 	public function getDriver() {
 		return $this->driver;
@@ -159,7 +160,7 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 	/**
 	 * Returns the current rendering context
 	 *
-	 * @return PHPWord_Section
+	 * @return object|MpdfWrapper|\PHPWord_Section
 	 */
 	public function getContext() {
 	    return $this->context;
@@ -168,7 +169,7 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 	/**
 	 * Set the current rendering context
 	 *
-	 * @param PHPWord_Section $context
+	 * @param object|MpdfWrapper|\PHPWord_Section $context
 	 * @return $this
 	 */
 	public function setContext($context) {
@@ -199,14 +200,14 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 	/* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
 	/**
 	 * Creates and prepares the driver instance
-	 * @return PHPWord Returns the driver
+	 * @return object|MpdfWrapper|\PHPWord Returns the driver
 	 */
 	abstract public function initializeDriver();
 
 	/**
 	 * Returns a new writer instance
 	 * @param	string $type The type of the writer
-	 * @return	PHPWord_Writer_IWriter
+	 * @return	object|MpdfWrapper|\PHPWord_Writer_IWriter
 	 */
 	abstract public function createWriter($type = NULL);
 

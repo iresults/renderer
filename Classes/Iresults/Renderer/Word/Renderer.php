@@ -45,7 +45,7 @@ class Renderer extends AbstractRenderer {
 
 	/**
 	 * Creates and prepares the driver instance
-	 * @return PHPWord Returns the driver
+	 * @return \PHPWord Returns the driver
 	 */
 	public function initializeDriver() {
 		$this->driver = new \PHPWord();
@@ -55,7 +55,7 @@ class Renderer extends AbstractRenderer {
 	/**
 	 * Returns a new writer instance
 	 * @param	string $type The type of the writer
-	 * @return	PHPWord_Writer_IWriter
+	 * @return	\PHPWord_Writer_IWriter
 	 */
 	public function createWriter($type = NULL) {
 		if (!$type) {
