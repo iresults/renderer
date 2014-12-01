@@ -93,7 +93,7 @@ class Template extends \PHPWord_Template {
         \ZIPARCHIVE::CM_DEFLATE          => 'deflated',
         \ZIPARCHIVE::CM_DEFLATE64        => 'deflate64',
         \ZIPARCHIVE::CM_PKWARE_IMPLODE   => 'PKWARE imploding',
-        \ZIPARCHIVE::CM_BZIP2            => 'BZIP2 algorithm',
+        #\ZIPARCHIVE::CM_BZIP2            => 'BZIP2 algorithm',
         \ZIPARCHIVE::ER_OK               => 'No error.',
         \ZIPARCHIVE::ER_MULTIDISK        => 'Multi-disk zip archives not supported.',
         \ZIPARCHIVE::ER_RENAME           => 'Renaming temporary file failed.',
