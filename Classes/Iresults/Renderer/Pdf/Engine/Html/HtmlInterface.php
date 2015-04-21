@@ -65,7 +65,8 @@ interface HtmlInterface extends RendererInterface {
 	 *
 	 * @param string $templatePath
 	 * @return $this
-	 */
+     * @throws \Iresults\Renderer\Exception\InvalidPathException if the given path does not exist or is not readable
+     */
 	public function setTemplatePath($templatePath);
 
 	/**
@@ -99,7 +100,8 @@ interface HtmlInterface extends RendererInterface {
 	 *
 	 * @param string $stylesPath
 	 * @return $this
-	 */
+     * @throws \Iresults\Renderer\Exception\InvalidPathException if the given path does not exist or is not readable
+     */
 	public function setStylesPath($stylesPath);
 
 	/**
