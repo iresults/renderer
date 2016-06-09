@@ -105,6 +105,9 @@ class MpdfWrapper extends BaseMpdf {
 	 * @return $this
 	 */
 	public function addFontDirectoryPath($fontDirectoryPath) {
+        if (substr($fontDirectoryPath, -1) !== '/') {
+            $fontDirectoryPath .= '/';
+        }
 		$this->fontDirectoryPaths[] = $fontDirectoryPath;
 		return $this;
 	}

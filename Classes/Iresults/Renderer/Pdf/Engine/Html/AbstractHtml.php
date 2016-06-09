@@ -25,6 +25,7 @@ namespace Iresults\Renderer\Pdf\Engine\Html;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  */
+use Iresults\Renderer\Exception\InvalidPathException;
 
 /**
  * @author COD
@@ -205,9 +206,24 @@ abstract class AbstractHtml implements HtmlInterface {
 	 *
 	 * @param string $templatePath
 	 * @return $this
-	 */
+     * @throws \Iresults\Renderer\Exception\InvalidPathException if the given path does not exist or is not readable
+     */
 	public function setTemplatePath($templatePath) {
 		$this->_needsToRender = TRUE;
+
+        if (!file_exists($templatePath)) {
+            throw new InvalidPathException(
+                sprintf('Template path "%s" could not be found', $templatePath),
+                1429523757
+            );
+        }
+        if (!is_readable($templatePath)) {
+            throw new InvalidPathException(
+                sprintf('Template path "%s" is not readable', $templatePath),
+                1429523758
+            );
+        }
+
 		$this->templatePath = $templatePath;
 		return $this;
 	}
@@ -252,15 +268,28 @@ abstract class AbstractHtml implements HtmlInterface {
 		return $this->styles;
 	}
 
-	/**
-	 * Sets the path to the styles to be added to the PDF
-	 *
-	 * @param string $stylesPath
-	 * @return $this
-	 */
+    /**
+     * Sets the path to the styles to be added to the PDF
+     *
+     * @param string $stylesPath
+     * @return $this
+     * @throws \Iresults\Renderer\Exception\InvalidPathException if the given path does not exist or is not readable
+     */
 	public function setStylesPath($stylesPath) {
 		$this->_needsToRender = TRUE;
 
+        if (!file_exists($stylesPath)) {
+            throw new InvalidPathException(
+                sprintf('Styles path "%s" could not be found', $stylesPath),
+                1429523747
+            );
+        }
+        if (!is_readable($stylesPath)) {
+            throw new InvalidPathException(
+                sprintf('Styles path "%s" is not readable', $stylesPath),
+                1429523748
+            );
+        }
 		$this->stylesPath = $stylesPath;
 		return $this;
 	}

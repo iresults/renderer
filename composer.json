@@ -19,7 +19,7 @@
         },
         {
             "type": "git",
-            "url": "http://git.iresults.me/Iresults.Core.git/"
+            "url": "http://git.iresults.me/git/iresults/core.git"
         }
     ],
     "autoload": {
