@@ -227,4 +227,3 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 	 */
 	abstract public function initWithTemplate($templateFilePath);
 }
-?>

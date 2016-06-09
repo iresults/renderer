@@ -137,4 +137,3 @@ class Renderer extends AbstractRenderer {
 		parent::save($savePath, $type);
 	}
 }
-?>
