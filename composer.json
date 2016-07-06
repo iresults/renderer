@@ -10,13 +10,9 @@
         }
     ],
     "require": {
-        "iresults/core": "*"
+        "iresults/core": "~3.2.0"
     },
     "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/lrobert/PHPWord.git"
-        },
         {
             "type": "git",
             "url": "https://git.iresults.li/git/iresults/core.git"
@@ -28,9 +24,9 @@
         }
     },
     "suggest": {
-        "lrobert/phpword": "Allows Word Doc rendering"
-    },
-    "minimum-stability": "dev"
+        "phpoffice/phpword": "Allows Word Doc rendering",
+        "mpdf/mpdf": "Allows PDF rendering from HTML"
+}
 }
 
 
