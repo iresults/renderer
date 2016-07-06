@@ -130,6 +130,19 @@ abstract class AbstractRenderer extends Model implements RendererInterface {
 	}
 
 	/**
+	 * Outputs the rendered data directly to the browser.
+	 *
+	 * @param	string	$name	 This appears as the name of the downloaded file
+	 * @param   string $type         The type of the writer
+	 * @return	void
+	 */
+	public function outputAndExit($name = '', $type = NULL) {
+		$this->output($name, $type);
+
+		exit();
+	}
+
+	/**
 	 * Returns the driver instance
 	 * @return object|MpdfWrapper|\PHPWord
 	 */

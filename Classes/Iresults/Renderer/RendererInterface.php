@@ -56,6 +56,15 @@ interface RendererInterface {
 	public function output($name = '', $type = NULL);
 
 	/**
+	 * Outputs the rendered data directly to the browser and exit script execution
+	 *
+	 * @param string $name This appears as the name of the downloaded file
+	 * @param string $type The type of the writer
+	 * @return void
+	 */
+	public function outputAndExit($name = '', $type = NULL);
+
+	/**
 	 * Returns the path the file will be saved at
 	 *
 	 * @return string

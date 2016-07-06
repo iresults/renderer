@@ -103,12 +103,15 @@ abstract class AbstractHtml implements HtmlInterface {
 	 *
 	 * @param string $savePath The path to which the output will be written
 	 * @param string $type     The type of the writer
-	 * @return void
+     * @throws InvalidPathException if no save path is defined
 	 */
 	public function save($savePath = '', $type = NULL) {
 		if (!$savePath) {
 			$savePath = $this->getSavePath();
 		}
+        if (!$savePath) {
+            throw new InvalidPathException('No save path given', 1467642145);
+        }
 		$this->render();
 		$this->getContext()->Output($savePath, 'F');
 	}
@@ -129,6 +132,19 @@ abstract class AbstractHtml implements HtmlInterface {
 
 		$this->render();
 		$this->getContext()->Output($name, 'D');
+	}
+
+	/**
+	 * Outputs the rendered data directly to the browser.
+	 *
+	 * @param	string	$name	 This appears as the name of the downloaded file
+	 * @param   string $type         The type of the writer
+	 * @return	void
+	 */
+	public function outputAndExit($name = '', $type = NULL) {
+		$this->output($name, $type);
+
+		exit();
 	}
 
 	/**

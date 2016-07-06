@@ -44,7 +44,7 @@ class MpdfHtml extends AbstractHtml {
 	/**
 	 * Returns the current rendering context (i.e. a section or page)
 	 *
-	 * @return mixed
+	 * @return MpdfWrapper
 	 */
 	public function getContext() {
 		if (!$this->context) {
