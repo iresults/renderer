@@ -42,7 +42,7 @@ use TTFontFile;
 /**
  * Wrapper class for the mPDF library
  *
- * @property $fontdata
+ * @property       $fontdata
  * @property array $available_unifonts
  * @package Iresults\Renderer\Pdf\Wrapper
  */
@@ -259,7 +259,10 @@ class MpdfWrapper extends BaseMpdf
     {
         foreach ($fontData as $fontFileName) {
             if (!$this->getPathForFont($fontFileName)) {
-                $error = new InvalidFontPathException('Font file "' . $fontFileName . '" not found', 1392640103);
+                $allFontDirectories = implode(', ', $this->getFontDirectoryPaths());
+                $error = new InvalidFontPathException(
+                    sprintf('Font file "%s" not found in %s', $fontFileName, $allFontDirectories), 1392640103
+                );
 
                 return false;
             }
