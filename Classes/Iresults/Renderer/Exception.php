@@ -39,5 +39,6 @@ use Exception as BaseException;
  *
  * @package Iresults\Renderer
  */
-class Exception extends BaseException {
+class Exception extends BaseException
+{
 }

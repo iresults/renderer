@@ -31,27 +31,30 @@ use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper as MpdfWrapper;
  * @author COD
  * Created 09.10.13 10:43
  */
+class MpdfHtml extends AbstractHtml
+{
+    /**
+     * Render the PDF
+     */
+    protected function _render()
+    {
+        $this->getContext()->WriteHTML($this->getStyles(), 1);
+        $this->getContext()->WriteHTML($this->getTemplate(), 2);
+    }
 
-class MpdfHtml extends AbstractHtml {
-	/**
-	 * Render the PDF
-	 */
-	protected function _render() {
-		$this->getContext()->WriteHTML($this->getStyles(), 1);
-		$this->getContext()->WriteHTML($this->getTemplate(), 2);
-	}
+    /**
+     * Returns the current rendering context (i.e. a section or page)
+     *
+     * @return MpdfWrapper
+     */
+    public function getContext()
+    {
+        if (!$this->context) {
+            $this->context = new MpdfWrapper();
+            $this->context->SetDisplayMode('fullpage');
+            $this->context->list_indent_first_level = 0;    // 1 or 0 - whether to indent the first level of a list
+        }
 
-	/**
-	 * Returns the current rendering context (i.e. a section or page)
-	 *
-	 * @return MpdfWrapper
-	 */
-	public function getContext() {
-		if (!$this->context) {
-			$this->context = new MpdfWrapper();
-			$this->context->SetDisplayMode('fullpage');
-			$this->context->list_indent_first_level = 0;    // 1 or 0 - whether to indent the first level of a list
-		}
-		return $this->context;
-	}
+        return $this->context;
+    }
 }

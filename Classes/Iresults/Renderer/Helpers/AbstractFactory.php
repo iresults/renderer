@@ -34,37 +34,41 @@ namespace Iresults\Renderer\Helpers;
 /**
  * An abstract base class for object factories
  */
-abstract class AbstractFactory {
-	/**
-	 * Creates an instance of the factories classes
-	 *
-	 * @param array  $constructorArguments Optional arguments to pass to the constructor
-	 * @param string $className            Name of the class to create an instance of
-	 * @throws \UnexpectedValueException if no implementation was found
-	 * @return object
-	 */
-	static protected function _createInstance($constructorArguments = array(), $className = '') {
-		if (!$className) {
-			$className = static::_getFactoryClass();
-			if ($className === FALSE) {
-				throw new \UnexpectedValueException('No implementation found in ' . get_called_class(), 1381327896);
-			}
-		}
-		if (!$constructorArguments) {
-			return new $className();
-		}
-		$reflect  = new \ReflectionClass($className);
-		$instance = $reflect->newInstanceArgs($constructorArguments);
-		return $instance;
-	}
+abstract class AbstractFactory
+{
+    /**
+     * Creates an instance of the factories classes
+     *
+     * @param array  $constructorArguments Optional arguments to pass to the constructor
+     * @param string $className            Name of the class to create an instance of
+     * @throws \UnexpectedValueException if no implementation was found
+     * @return object
+     */
+    static protected function _createInstance($constructorArguments = array(), $className = '')
+    {
+        if (!$className) {
+            $className = static::_getFactoryClass();
+            if ($className === false) {
+                throw new \UnexpectedValueException('No implementation found in ' . get_called_class(), 1381327896);
+            }
+        }
+        if (!$constructorArguments) {
+            return new $className();
+        }
+        $reflect = new \ReflectionClass($className);
+        $instance = $reflect->newInstanceArgs($constructorArguments);
 
-	/**
-	 * Returns the name of the class the factory should produce
-	 *
-	 * @throws \UnexpectedValueException if the method has not been overwritten
-	 * @return string
-	 */
-	static protected function _getFactoryClass() {
-		throw new \UnexpectedValueException('Please overwrite this static method', 1381327557);
-	}
+        return $instance;
+    }
+
+    /**
+     * Returns the name of the class the factory should produce
+     *
+     * @throws \UnexpectedValueException if the method has not been overwritten
+     * @return string
+     */
+    static protected function _getFactoryClass()
+    {
+        throw new \UnexpectedValueException('Please overwrite this static method', 1381327557);
+    }
 }

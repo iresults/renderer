@@ -1,5 +1,4 @@
 <?php
-namespace Iresults\Renderer\Tests\Unit\Word;
 
 /*
  * Copyright (c) 2013 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
@@ -28,6 +27,8 @@ namespace Iresults\Renderer\Tests\Unit\Word;
  * @version	1.0.0
  */
 
+namespace Iresults\Renderer\Tests\Unit\Word;
+
 // include __DIR__ . '/../../Classes/Iresults/Word/Renderer.php';
 
 
@@ -48,9 +49,11 @@ namespace Iresults\Renderer\Tests\Unit\Word;
 use Iresults\Renderer\Word\Renderer;
 use org\bovigo\vfs\vfsStream;
 
-class WordTest extends \PHPUnit_Framework_TestCase {
-	/**
+class WordTest extends \PHPUnit_Framework_TestCase
+{
+    /**
      * The path the test file will be saved to
+     *
      * @type  string
      */
     protected $savePath;
@@ -58,55 +61,58 @@ class WordTest extends \PHPUnit_Framework_TestCase {
     /**
      * Set up the test environment
      */
-	public function setUp() {
-		$this->savePath = tempnam(sys_get_temp_dir(), 'IWR');
-	}
+    public function setUp()
+    {
+        $this->savePath = tempnam(sys_get_temp_dir(), 'IWR');
+    }
 
-	/**
-	 * Remove the temporary file
-	 */
-	public function tearDown() {
-		unlink($this->savePath);
-	}
+    /**
+     * Remove the temporary file
+     */
+    public function tearDown()
+    {
+        unlink($this->savePath);
+    }
 
-	/**
-	 * @test
-	 */
-	public function createDocument() {
-		$document = new Renderer();
-		$document->getContext()->addText('Hello world!');
-		$document->save($this->savePath);
+    /**
+     * @test
+     */
+    public function createDocument()
+    {
+        $document = new Renderer();
+        $document->getContext()->addText('Hello world!');
+        $document->save($this->savePath);
 
-		$this->assertTrue(file_exists($this->savePath));
-	}
+        $this->assertTrue(file_exists($this->savePath));
+    }
 
-	/**
-	 * @test
-	 */
-	public function createDocumentFromTemplate() {
-		/**
-		 * The renderer that encapsulates the template instance
-		 * @var Iresults\Renderer\Word\Renderer
-		 */
-		$document = Renderer::rendererWithTemplate(__DIR__ . '/reference.docx');
+    /**
+     * @test
+     */
+    public function createDocumentFromTemplate()
+    {
+        /**
+         * The renderer that encapsulates the template instance
+         *
+         * @var Iresults\Renderer\Word\Renderer
+         */
+        $document = Renderer::rendererWithTemplate(__DIR__ . '/reference.docx');
 
-		// Assign variables through the context
-		$document->getContext()->assign('time', date('r'));
-		$document->getContext()->assign('some', 5);
+        // Assign variables through the context
+        $document->getContext()->assign('time', date('r'));
+        $document->getContext()->assign('some', 5);
 
-		$author = new \stdClass();
-		$author->firstName = 'Ægir';
-		$author->lastName = 'Jørgensen';
+        $author = new \stdClass();
+        $author->firstName = 'Ægir';
+        $author->lastName = 'Jørgensen';
 
-		/*
-		 * The document should automatically forward unknown method calls to the
-		 * context or the driver
-		 */
-		$document->assign('author', $author);
+        /*
+         * The document should automatically forward unknown method calls to the
+         * context or the driver
+         */
+        $document->assign('author', $author);
 
-
-		$document->save($this->savePath);
-		$this->assertTrue(file_exists($this->savePath));
-
-	}
+        $document->save($this->savePath);
+        $this->assertTrue(file_exists($this->savePath));
+    }
 }

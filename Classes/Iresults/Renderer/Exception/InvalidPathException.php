@@ -38,5 +38,6 @@ use Iresults\Renderer\Exception;
  *
  * @package Iresults\Renderer\Exception
  */
-class InvalidPathException extends Exception {
+class InvalidPathException extends Exception
+{
 }

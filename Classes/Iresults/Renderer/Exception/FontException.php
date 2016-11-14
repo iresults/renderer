@@ -38,5 +38,6 @@ use Iresults\Renderer\Exception;
  *
  * @package Iresults\Renderer\Exception
  */
-class FontException extends Exception {
+class FontException extends Exception
+{
 }

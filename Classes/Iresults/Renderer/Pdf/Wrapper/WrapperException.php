@@ -31,6 +31,7 @@
 
 
 namespace Iresults\Renderer\Pdf\Wrapper;
+
 use Iresults\Renderer\Exception;
 
 /**
@@ -38,6 +39,7 @@ use Iresults\Renderer\Exception;
  *
  * @package Iresults\Renderer\Pdf\Wrapper
  */
-class WrapperException extends Exception {
+class WrapperException extends Exception
+{
 
 }

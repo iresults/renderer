@@ -33,5 +33,6 @@ namespace Iresults\Renderer\Pdf\Wrapper\Exception;
 
 use Iresults\Renderer\Exception\FontException;
 
-class InvalidFontPathException extends FontException {
+class InvalidFontPathException extends FontException
+{
 }

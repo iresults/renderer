@@ -43,27 +43,28 @@ use TTFontFile;
  * Wrapper class for the mPDF library
  *
  * @property $fontdata
+ * @property array $available_unifonts
  * @package Iresults\Renderer\Pdf\Wrapper
  */
 class MpdfWrapper extends BaseMpdf
 {
-	/**
-	 * A list of defaults which will be set after the mPDF initialization
-	 *
-	 * @var array
-	 */
-	protected $overwriteDefaults = array(
+    /**
+     * A list of defaults which will be set after the mPDF initialization
+     *
+     * @var array
+     */
+    protected $overwriteDefaults = array(
         'autoLangToFont' => false,
-	);
+    );
 
-	/**
-	 * Paths to directories where fonts are stored in
-	 *
-	 * @var array
-	 */
-	protected $fontDirectoryPaths = array(
-		_MPDF_TTFONTPATH,
-	);
+    /**
+     * Paths to directories where fonts are stored in
+     *
+     * @var array
+     */
+    protected $fontDirectoryPaths = array(
+        _MPDF_TTFONTPATH,
+    );
 
     function __construct(
         $mode = '',
@@ -78,13 +79,13 @@ class MpdfWrapper extends BaseMpdf
         $mgf = 9,
         $orientation = 'P'
     ) {
-		$this->_initializeLibrary();
+        $this->_initializeLibrary();
 
-		if (defined('_MPDF_SYSTEM_TTFONTS')) {
-			array_unshift($this->fontDirectoryPaths, _MPDF_SYSTEM_TTFONTS);
-		}
+        if (defined('_MPDF_SYSTEM_TTFONTS')) {
+            array_unshift($this->fontDirectoryPaths, _MPDF_SYSTEM_TTFONTS);
+        }
 
-		$funcArgs = func_get_args();
+        $funcArgs = func_get_args();
 
         $isMinimumVersion6 = defined('mPDF_VERSION') && version_compare(mPDF_VERSION, 6.0) >= 0;
         if ($isMinimumVersion6) {
@@ -102,348 +103,345 @@ class MpdfWrapper extends BaseMpdf
                 $orientation
             );
         } else {
-		call_user_func_array(array($this, 'mPDF'), $funcArgs);
+            call_user_func_array(array($this, 'mPDF'), $funcArgs);
             if (isset($this->overwriteDefaults['autoLangToFont'])) {
                 $this->overwriteDefaults['useLang'] = $this->overwriteDefaults['autoLangToFont'];
             }
         }
 
-		$this->_initializeObject();
+        $this->_initializeObject();
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Returns the paths to directories where fonts are stored in
-	 *
-	 * @return array<string>
-	 */
+    /**
+     * Returns the paths to directories where fonts are stored in
+     *
+     * @return array<string>
+     */
     public function getFontDirectoryPaths()
     {
-		return $this->fontDirectoryPaths;
-	}
+        return $this->fontDirectoryPaths;
+    }
 
-	/**
-	 * Sets the paths to directories where fonts are stored in
-	 *
-	 * @param array <string> $fontDirectoryPaths
-	 * @return $this
-	 */
+    /**
+     * Sets the paths to directories where fonts are stored in
+     *
+     * @param array <string> $fontDirectoryPaths
+     * @return $this
+     */
     public function setFontDirectoryPaths($fontDirectoryPaths)
     {
-		$this->fontDirectoryPaths = $fontDirectoryPaths;
+        $this->fontDirectoryPaths = $fontDirectoryPaths;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Adds a directory where fonts are stored in
-	 *
-	 * @param string $fontDirectoryPath
-	 * @return $this
-	 */
+    /**
+     * Adds a directory where fonts are stored in
+     *
+     * @param string $fontDirectoryPath
+     * @return $this
+     */
     public function addFontDirectoryPath($fontDirectoryPath)
     {
         if (substr($fontDirectoryPath, -1) !== '/') {
             $fontDirectoryPath .= '/';
         }
-		$this->fontDirectoryPaths[] = $fontDirectoryPath;
+        $this->fontDirectoryPaths[] = $fontDirectoryPath;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Throws an exception
-	 *
-	 * @param string $msg
-	 * @throws WrapperException
-	 */
+    /**
+     * Throws an exception
+     *
+     * @param string $msg
+     * @throws WrapperException
+     */
     public function throwException($msg)
     {
-		throw new WrapperException($msg);
-	}
+        throw new WrapperException($msg);
+    }
 
-	/**
-	 * Registers the given fonts
-	 *
-	 * Example $fontData:
-	 *
-	 * array(
-	 *    "dejavusanscondensed" => array(
-	 *        'R' => "DejaVuSansCondensed.ttf",
-	 *        'B' => "DejaVuSansCondensed-Bold.ttf",
-	 *        'I' => "DejaVuSansCondensed-Oblique.ttf",
-	 *        'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
-	 *    ),
-	 * )
-	 *
-	 * @param array $fontDataCollection
-	 * @throws InvalidFontNameException if the font name is not lower case
-	 * @throws Exception if an entry in the collection is invalid
-	 * @return $this
-	 */
+    /**
+     * Registers the given fonts
+     *
+     * Example $fontData:
+     *
+     * array(
+     *    "dejavusanscondensed" => array(
+     *        'R' => "DejaVuSansCondensed.ttf",
+     *        'B' => "DejaVuSansCondensed-Bold.ttf",
+     *        'I' => "DejaVuSansCondensed-Oblique.ttf",
+     *        'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
+     *    ),
+     * )
+     *
+     * @param array $fontDataCollection
+     * @throws InvalidFontNameException if the font name is not lower case
+     * @throws Exception if an entry in the collection is invalid
+     * @return $this
+     */
     public function registerFonts($fontDataCollection)
     {
-		if (is_array($fontDataCollection)) {
-			foreach ($fontDataCollection as $fontName => $fontData) {
-				if (strtolower($fontName) !== $fontName) {
-					throw new InvalidFontNameException('Font name must be lower case', 1392652327);
-				}
+        if (is_array($fontDataCollection)) {
+            foreach ($fontDataCollection as $fontName => $fontData) {
+                if (strtolower($fontName) !== $fontName) {
+                    throw new InvalidFontNameException('Font name must be lower case', 1392652327);
+                }
 
-				/** @var Exception $error */
+                /** @var Exception $error */
                 $error = null;
-				if (!$this->validateFontData($fontData, $error)) {
-					throw $error;
-					// throw new WrapperException('Given font data is invalid', 1392635396);
-				}
-			}
+                if (!$this->validateFontData($fontData, $error)) {
+                    throw $error;
+                    // throw new WrapperException('Given font data is invalid', 1392635396);
+                }
+            }
 
 
-			$this->fontdata = array_merge_recursive($this->fontdata, $fontDataCollection);
+            $this->fontdata = array_merge_recursive($this->fontdata, $fontDataCollection);
 
+            foreach ($fontDataCollection AS $fontName => $fontData) {
+                if (isset($fontData['R']) && $fontData['R']) {
+                    $this->available_unifonts[] = $fontName;
+                }
+                if (isset($fontData['B']) && $fontData['B']) {
+                    $this->available_unifonts[] = $fontName . 'B';
+                }
+                if (isset($fontData['I']) && $fontData['I']) {
+                    $this->available_unifonts[] = $fontName . 'I';
+                }
+                if (isset($fontData['BI']) && $fontData['BI']) {
+                    $this->available_unifonts[] = $fontName . 'BI';
+                }
+            }
+        }
 
-			foreach ($fontDataCollection AS $fontName => $fontData) {
-				if (isset($fontData['R']) && $fontData['R']) {
-					$this->available_unifonts[] = $fontName;
-				}
-				if (isset($fontData['B']) && $fontData['B']) {
-					$this->available_unifonts[] = $fontName . 'B';
-				}
-				if (isset($fontData['I']) && $fontData['I']) {
-					$this->available_unifonts[] = $fontName . 'I';
-				}
-				if (isset($fontData['BI']) && $fontData['BI']) {
-					$this->available_unifonts[] = $fontName . 'BI';
-				}
-			}
+        return $this;
+    }
 
-
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Registers the given font
-	 *
-	 * Example $fontData:
-	 *
-	 * array(
-	 *    'R' => "DejaVuSansCondensed.ttf",
-	 *    'B' => "DejaVuSansCondensed-Bold.ttf",
-	 *    'I' => "DejaVuSansCondensed-Oblique.ttf",
-	 *    'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
-	 * )
-	 *
-	 * @param string $fontName
-	 * @param array  $fontData
-	 * @throws InvalidFontNameException if the font name is not lower case
-	 * @return $this
-	 */
+    /**
+     * Registers the given font
+     *
+     * Example $fontData:
+     *
+     * array(
+     *    'R' => "DejaVuSansCondensed.ttf",
+     *    'B' => "DejaVuSansCondensed-Bold.ttf",
+     *    'I' => "DejaVuSansCondensed-Oblique.ttf",
+     *    'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
+     * )
+     *
+     * @param string $fontName
+     * @param array  $fontData
+     * @throws InvalidFontNameException if the font name is not lower case
+     * @return $this
+     */
     public function registerFont($fontName, $fontData)
     {
-		if (strtolower($fontName) !== $fontName) {
-			throw new InvalidFontNameException('Font name must be lower case', 1392652327);
-		}
+        if (strtolower($fontName) !== $fontName) {
+            throw new InvalidFontNameException('Font name must be lower case', 1392652327);
+        }
 
-		return $this->registerFonts(array($fontName => $fontData));
-	}
+        return $this->registerFonts(array($fontName => $fontData));
+    }
 
 
-	/**
-	 * Validates the given font data
-	 *
-	 * @param array $fontData Font data to validate
-	 * @param       array     <mixed> $error Reference to be filled with the error
-	 * @return boolean Returns if the data is valid
-	 */
+    /**
+     * Validates the given font data
+     *
+     * @param array $fontData Font data to validate
+     * @param       array     <mixed> $error Reference to be filled with the error
+     * @return boolean Returns if the data is valid
+     */
     public function validateFontData($fontData, &$error = null)
     {
-		foreach ($fontData as $fontFileName) {
-			if (!$this->getPathForFont($fontFileName)) {
-				$error = new InvalidFontPathException('Font file "' . $fontFileName . '" not found', 1392640103);
+        foreach ($fontData as $fontFileName) {
+            if (!$this->getPathForFont($fontFileName)) {
+                $error = new InvalidFontPathException('Font file "' . $fontFileName . '" not found', 1392640103);
 
                 return false;
-			}
-		}
+            }
+        }
 
         return true;
-	}
+    }
 
-	/**
-	 * Returns the path to the given font or NULL if it is not found
-	 *
-	 * @param string $fontFileName
-	 * @return string|NULL
-	 */
+    /**
+     * Returns the path to the given font or NULL if it is not found
+     *
+     * @param string $fontFileName
+     * @return string|NULL
+     */
     public function getPathForFont($fontFileName)
     {
-		$fontDirectoryPaths = $this->getFontDirectoryPaths();
-		$currentFontDirectoryPath = reset($fontDirectoryPaths);
-		do {
-			if (file_exists($currentFontDirectoryPath . $fontFileName)) {
-				return $currentFontDirectoryPath . $fontFileName;
-			}
-		} while ($currentFontDirectoryPath = next($fontDirectoryPaths));
+        $fontDirectoryPaths = $this->getFontDirectoryPaths();
+        $currentFontDirectoryPath = reset($fontDirectoryPaths);
+        do {
+            if (file_exists($currentFontDirectoryPath . $fontFileName)) {
+                return $currentFontDirectoryPath . $fontFileName;
+            }
+        } while ($currentFontDirectoryPath = next($fontDirectoryPaths));
 
         return null;
-	}
+    }
 
-	/**
-	 * Sets the mPDFs constants
-	 */
+    /**
+     * Sets the mPDFs constants
+     */
     protected function _initializeLibrary()
     {
-		if (!defined('_MPDF_TTFONTDATAPATH')) {
-			define('_MPDF_TTFONTDATAPATH', Iresults::getTempPath());
-		}
-		if (!defined('_MPDF_TEMP_PATH')) {
-			define('_MPDF_TEMP_PATH', Iresults::getTempPath());
-		}
-	}
+        if (!defined('_MPDF_TTFONTDATAPATH')) {
+            define('_MPDF_TTFONTDATAPATH', Iresults::getTempPath());
+        }
+        if (!defined('_MPDF_TEMP_PATH')) {
+            define('_MPDF_TEMP_PATH', Iresults::getTempPath());
+        }
+    }
 
-	/**
-	 * Sets additional object properties
-	 */
+    /**
+     * Sets additional object properties
+     */
     protected function _initializeObject()
     {
-		// Overwrite defaults
-		foreach ($this->overwriteDefaults as $key => $value) {
-			$this->$key = $value;
-		}
-	}
+        // Overwrite defaults
+        foreach ($this->overwriteDefaults as $key => $value) {
+            $this->$key = $value;
+        }
+    }
 
 
-	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-	// OVERWRITES
-	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-	/**
-	 * Throws an exception instead of terminating the script on error
-	 *
-	 * @param string $msg
-	 * @throws WrapperException
-	 */
+    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    // OVERWRITES
+    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    /**
+     * Throws an exception instead of terminating the script on error
+     *
+     * @param string $msg
+     * @throws WrapperException
+     */
     function Error($msg)
     {
-		$this->throwException($msg);
-	}
+        $this->throwException($msg);
+    }
 
     function AddFont($family, $style = '')
     {
-		if (empty($family)) {
-			return;
-		}
-		$family = strtolower($family);
-		$style = strtoupper($style);
-		$style = str_replace('U', '', $style);
+        if (empty($family)) {
+            return;
+        }
+        $family = strtolower($family);
+        $style = strtoupper($style);
+        $style = str_replace('U', '', $style);
         if ($style == 'IB') {
             $style = 'BI';
         }
-		$fontkey = $family . $style;
-		// check if the font has been already added
-		if (isset($this->fonts[$fontkey])) {
-			return;
-		}
+        $fontkey = $family . $style;
+        // check if the font has been already added
+        if (isset($this->fonts[$fontkey])) {
+            return;
+        }
 
-		/*-- CJK-FONTS --*/
-		if (in_array($family, $this->available_CJK_fonts)) {
-			if (empty($this->Big5_widths)) {
-				require(_MPDF_PATH . 'includes/CJKdata.php');
-			}
-			$this->AddCJKFont($family); // don't need to add style
-			return;
-		}
-		/*-- END CJK-FONTS --*/
+        /*-- CJK-FONTS --*/
+        if (in_array($family, $this->available_CJK_fonts)) {
+            if (empty($this->Big5_widths)) {
+                require(_MPDF_PATH . 'includes/CJKdata.php');
+            }
+            $this->AddCJKFont($family); // don't need to add style
+            return;
+        }
+        /*-- END CJK-FONTS --*/
 
-		// IRESULTS - COD MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMW
-		if ($this->usingCoreFont) {
-			$this->throwException("mPDF Error - problem with Font management");
-		}
+        // IRESULTS - COD MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMW
+        if ($this->usingCoreFont) {
+            $this->throwException("mPDF Error - problem with Font management");
+        }
 
-		$stylekey = $style;
-		if (!$style) {
-			$stylekey = 'R';
-		}
+        $stylekey = $style;
+        if (!$style) {
+            $stylekey = 'R';
+        }
 
-		if (!isset($this->fontdata[$family][$stylekey]) || !$this->fontdata[$family][$stylekey]) {
-			$this->throwException('mPDF Error - Font is not supported - ' . $family . ' ' . $style);
-		}
-		// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+        if (!isset($this->fontdata[$family][$stylekey]) || !$this->fontdata[$family][$stylekey]) {
+            $this->throwException('mPDF Error - Font is not supported - ' . $family . ' ' . $style);
+        }
+        // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 
-		$name = '';
-		$originalsize = 0;
+        $name = '';
+        $originalsize = 0;
         $sip = false;
         $smp = false;
         $unAGlyphs = false; // mPDF 5.4.05
         $haskerninfo = false;
         $BMPselected = false;
-		@include(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php');
+        @include(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php');
 
-		$ttffile = '';
-		// IRESULTS - COD MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMW
-		/*
-		if (defined('_MPDF_SYSTEM_TTFONTS')) {
-			$ttffile = _MPDF_SYSTEM_TTFONTS . $this->fontdata[$family][$stylekey];
-			if (!file_exists($ttffile)) {
-				$ttffile = '';
-			}
-		}
-		if (!$ttffile) {
-			$ttffile = _MPDF_TTFONTPATH . $this->fontdata[$family][$stylekey];
-			if (!file_exists($ttffile)) {
-				die("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
-			}
-		}
-		*/
+        $ttffile = '';
+        // IRESULTS - COD MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMW
+        /*
+        if (defined('_MPDF_SYSTEM_TTFONTS')) {
+            $ttffile = _MPDF_SYSTEM_TTFONTS . $this->fontdata[$family][$stylekey];
+            if (!file_exists($ttffile)) {
+                $ttffile = '';
+            }
+        }
+        if (!$ttffile) {
+            $ttffile = _MPDF_TTFONTPATH . $this->fontdata[$family][$stylekey];
+            if (!file_exists($ttffile)) {
+                die("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
+            }
+        }
+        */
 
-		$ttffile = $this->getPathForFont($this->fontdata[$family][$stylekey]);
+        $ttffile = $this->getPathForFont($this->fontdata[$family][$stylekey]);
         if ($ttffile === null) {
             throw new InvalidFontPathException(
-                'Font file "'.$this->fontdata[$family][$stylekey].'" not found',
+                'Font file "' . $this->fontdata[$family][$stylekey] . '" not found',
                 1392640103
             );
-		}
-		// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+        }
+        // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 
-		$ttfstat = stat($ttffile);
+        $ttfstat = stat($ttffile);
 
-		if (isset($this->fontdata[$family]['TTCfontID'][$stylekey])) {
-			$TTCfontID = $this->fontdata[$family]['TTCfontID'][$stylekey];
-		} else {
-			$TTCfontID = 0;
-		}
+        if (isset($this->fontdata[$family]['TTCfontID'][$stylekey])) {
+            $TTCfontID = $this->fontdata[$family]['TTCfontID'][$stylekey];
+        } else {
+            $TTCfontID = 0;
+        }
 
 
         $BMPonly = false;
-		if (in_array($family, $this->BMPonly)) {
+        if (in_array($family, $this->BMPonly)) {
             $BMPonly = true;
-		}
+        }
         $regenerate = false;
-		if ($BMPonly && !$BMPselected) {
+        if ($BMPonly && !$BMPselected) {
             $regenerate = true;
         } else {
             if (!$BMPonly && $BMPselected) {
                 $regenerate = true;
-		}
+            }
         }
-		if ($this->useKerning && !$haskerninfo) {
+        if ($this->useKerning && !$haskerninfo) {
             $regenerate = true;
-		}
-		// mPDF 5.4.05
-		if (isset($this->fontdata[$family]['unAGlyphs']) && $this->fontdata[$family]['unAGlyphs'] && !$unAGlyphs) {
+        }
+        // mPDF 5.4.05
+        if (isset($this->fontdata[$family]['unAGlyphs']) && $this->fontdata[$family]['unAGlyphs'] && !$unAGlyphs) {
             $regenerate = true;
             $unAGlyphs = true;
         } else {
             if ((!isset($this->fontdata[$family]['unAGlyphs']) || !$this->fontdata[$family]['unAGlyphs']) && $unAGlyphs) {
                 $regenerate = true;
                 $unAGlyphs = false;
-		}
+            }
         }
-		if (!isset($name) || $originalsize != $ttfstat['size'] || $regenerate) {
+        if (!isset($name) || $originalsize != $ttfstat['size'] || $regenerate) {
             if (!class_exists('TTFontFile', false)) {
-				include(_MPDF_PATH . 'classes/ttfontsuni.php');
-			}
-			$ttf = new TTFontFile();
+                include(_MPDF_PATH . 'classes/ttfontsuni.php');
+            }
+            $ttf = new TTFontFile();
             $ttf->getMetrics(
                 $ttffile,
                 $TTCfontID,
@@ -452,112 +450,114 @@ class MpdfWrapper extends BaseMpdf
                 $this->useKerning,
                 $unAGlyphs
             ); // mPDF 5.4.05
-			$cw = $ttf->charWidths;
-			$kerninfo = $ttf->kerninfo;
+            $cw = $ttf->charWidths;
+            $kerninfo = $ttf->kerninfo;
             $haskerninfo = true;
-			$name = preg_replace('/[ ()]/', '', $ttf->fullName);
-			$sip = $ttf->sipset;
-			$smp = $ttf->smpset;
+            $name = preg_replace('/[ ()]/', '', $ttf->fullName);
+            $sip = $ttf->sipset;
+            $smp = $ttf->smpset;
 
             $desc = array(
                 'Ascent'       => round($ttf->ascent),
-				'Descent' => round($ttf->descent),
-				'CapHeight' => round($ttf->capHeight),
-				'Flags' => $ttf->flags,
-                'FontBBox'     => '['.round($ttf->bbox[0])." ".round($ttf->bbox[1])." ".round($ttf->bbox[2])." ".round(
+                'Descent'      => round($ttf->descent),
+                'CapHeight'    => round($ttf->capHeight),
+                'Flags'        => $ttf->flags,
+                'FontBBox'     => '[' . round($ttf->bbox[0]) . " " . round($ttf->bbox[1]) . " " . round(
+                        $ttf->bbox[2]
+                    ) . " " . round(
                         $ttf->bbox[3]
-                    ).']',
-				'ItalicAngle' => $ttf->italicAngle,
-				'StemV' => round($ttf->stemV),
+                    ) . ']',
+                'ItalicAngle'  => $ttf->italicAngle,
+                'StemV'        => round($ttf->stemV),
                 'MissingWidth' => round($ttf->defaultWidth),
             );
-			$panose = '';
-			// mPDF 5.5.19
-			if (count($ttf->panose)) {
-				$panoseArray = array_merge(array($ttf->sFamilyClass, $ttf->sFamilySubClass), $ttf->panose);
+            $panose = '';
+            // mPDF 5.5.19
+            if (count($ttf->panose)) {
+                $panoseArray = array_merge(array($ttf->sFamilyClass, $ttf->sFamilySubClass), $ttf->panose);
                 foreach ($panoseArray as $value) {
-					$panose .= ' ' . dechex($value);
-			}
+                    $panose .= ' ' . dechex($value);
+                }
             }
-			$up = round($ttf->underlinePosition);
-			$ut = round($ttf->underlineThickness);
-			$originalsize = $ttfstat['size'] + 0;
-			$type = 'TTF';
-			//Generate metrics .php file
-			$s = '<?php' . "\n";
-			$s .= '$name=\'' . $name . "';\n";
-			$s .= '$type=\'' . $type . "';\n";
-            $s .= '$desc='.var_export($desc, true).";\n";
-			$s .= '$up=' . $up . ";\n";
-			$s .= '$ut=' . $ut . ";\n";
-			$s .= '$ttffile=\'' . $ttffile . "';\n";
-			$s .= '$TTCfontID=\'' . $TTCfontID . "';\n";
-			$s .= '$originalsize=' . $originalsize . ";\n";
+            $up = round($ttf->underlinePosition);
+            $ut = round($ttf->underlineThickness);
+            $originalsize = $ttfstat['size'] + 0;
+            $type = 'TTF';
+            //Generate metrics .php file
+            $s = '<?php' . "\n";
+            $s .= '$name=\'' . $name . "';\n";
+            $s .= '$type=\'' . $type . "';\n";
+            $s .= '$desc=' . var_export($desc, true) . ";\n";
+            $s .= '$up=' . $up . ";\n";
+            $s .= '$ut=' . $ut . ";\n";
+            $s .= '$ttffile=\'' . $ttffile . "';\n";
+            $s .= '$TTCfontID=\'' . $TTCfontID . "';\n";
+            $s .= '$originalsize=' . $originalsize . ";\n";
             if ($sip) {
-                $s .= '$sip=true;'."\n";
+                $s .= '$sip=true;' . "\n";
             } else {
-                $s .= '$sip=false;'."\n";
+                $s .= '$sip=false;' . "\n";
             }
             if ($smp) {
-                $s .= '$smp=true;'."\n";
+                $s .= '$smp=true;' . "\n";
             } else {
-                $s .= '$smp=false;'."\n";
+                $s .= '$smp=false;' . "\n";
             }
             if ($BMPonly) {
-                $s .= '$BMPselected=true;'."\n";
+                $s .= '$BMPselected=true;' . "\n";
             } else {
-                $s .= '$BMPselected=false;'."\n";
+                $s .= '$BMPselected=false;' . "\n";
             }
-			$s .= '$fontkey=\'' . $fontkey . "';\n";
-			$s .= '$panose=\'' . $panose . "';\n";
-			if ($this->useKerning) {
-                $s .= '$kerninfo='.var_export($kerninfo, true).";\n";
-				$s .= '$haskerninfo=true;' . "\n";
+            $s .= '$fontkey=\'' . $fontkey . "';\n";
+            $s .= '$panose=\'' . $panose . "';\n";
+            if ($this->useKerning) {
+                $s .= '$kerninfo=' . var_export($kerninfo, true) . ";\n";
+                $s .= '$haskerninfo=true;' . "\n";
             } else {
-                $s .= '$haskerninfo=false;'."\n";
+                $s .= '$haskerninfo=false;' . "\n";
             }
-			// mPDF 5.4.05
-			if ($this->fontdata[$family]['unAGlyphs']) {
-				$s .= '$unAGlyphs=true;' . "\n";
+            // mPDF 5.4.05
+            if ($this->fontdata[$family]['unAGlyphs']) {
+                $s .= '$unAGlyphs=true;' . "\n";
             } else {
-                $s .= '$unAGlyphs=false;'."\n";
+                $s .= '$unAGlyphs=false;' . "\n";
             }
-			$s .= "?>";
-			if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-				$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php', "w");
-				fwrite($fh, $s, strlen($s));
-				fclose($fh);
-				$fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat', "wb");
-				fwrite($fh, $cw, strlen($cw));
-				fclose($fh);
-				@unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm');
-				@unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.z');
-				@unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php');
-				@unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw');
+            $s .= "?>";
+            if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
+                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php', "w");
+                fwrite($fh, $s, strlen($s));
+                fclose($fh);
+                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat', "wb");
+                fwrite($fh, $cw, strlen($cw));
+                fclose($fh);
+                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm');
+                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.z');
+                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php');
+                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw');
             } else {
                 if ($this->debugfonts) {
-				$this->Error('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
-			}
+                    $this->Error('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
+                }
             }
-			unset($ttf);
-		} else {
-			$cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat');
-		}
+            unset($ttf);
+        } else {
+            $cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat');
+        }
 
-		if (isset($this->fontdata[$family]['indic']) && $this->fontdata[$family]['indic']) {
+        if (isset($this->fontdata[$family]['indic']) && $this->fontdata[$family]['indic']) {
             $indic = true;
-		} else {
+        } else {
             $indic = false;
-		}
-		if (isset($this->fontdata[$family]['sip-ext']) && $this->fontdata[$family]['sip-ext']) {
-			$sipext = $this->fontdata[$family]['sip-ext'];
-		} else {
-			$sipext = '';
-		}
+        }
+        if (isset($this->fontdata[$family]['sip-ext']) && $this->fontdata[$family]['sip-ext']) {
+            $sipext = $this->fontdata[$family]['sip-ext'];
+        } else {
+            $sipext = '';
+        }
 
 
-		$i = count($this->fonts) + $this->extraFontSubsets + 1;
-		if ($sip || $smp) {
+        $i = count($this->fonts) + $this->extraFontSubsets + 1;
+        if ($sip || $smp) {
             $this->fonts[$fontkey] = array(
                 'i'             => $i,
                 'type'          => $type,
@@ -579,11 +579,11 @@ class MpdfWrapper extends BaseMpdf
                 'TTCfontID'     => $TTCfontID,
                 'unAGlyphs'     => false,
             ); // mPDF 5.4.05
-		} else {
-			$ss = array();
-			for ($s = 32; $s < 128; $s++) {
-				$ss[$s] = $s;
-			}
+        } else {
+            $ss = array();
+            for ($s = 32; $s < 128; $s++) {
+                $ss[$s] = $s;
+            }
             $this->fonts[$fontkey] = array(
                 'i'         => $i,
                 'type'      => $type,
@@ -604,10 +604,10 @@ class MpdfWrapper extends BaseMpdf
                 'TTCfontID' => $TTCfontID,
                 'unAGlyphs' => $unAGlyphs,
             ); // mPDF 5.4.05
-		}
-		if ($this->useKerning && $haskerninfo) {
-			$this->fonts[$fontkey]['kerninfo'] = $kerninfo;
-		}
+        }
+        if ($this->useKerning && $haskerninfo) {
+            $this->fonts[$fontkey]['kerninfo'] = $kerninfo;
+        }
         $this->FontFiles[$fontkey] = array(
             'length1' => $originalsize,
             'type'    => "TTF",
@@ -615,7 +615,7 @@ class MpdfWrapper extends BaseMpdf
             'sip'     => $sip,
             'smp'     => $smp,
         );
-		unset($cw);
-	}
+        unset($cw);
+    }
 }
 

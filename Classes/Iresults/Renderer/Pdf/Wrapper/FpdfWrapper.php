@@ -39,28 +39,31 @@ use Iresults\Renderer\Exception;
  *
  * @package Iresults\Renderer\Pdf\Wrapper
  */
-class FpdfWrapper extends \FPDF {
-	/**
-	 * Throws an exception
-	 *
-	 * @param string $msg
-	 * @throws WrapperException
-	 */
-	public function throwException($msg) {
-		throw new WrapperException($msg);
-	}
+class FpdfWrapper extends \FPDF
+{
+    /**
+     * Throws an exception
+     *
+     * @param string $msg
+     * @throws WrapperException
+     */
+    public function throwException($msg)
+    {
+        throw new WrapperException($msg);
+    }
 
-	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-	// OVERWRITES
-	// MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-	/**
-	 * Throws an exception instead of terminating the script on error
-	 *
-	 * @param string $msg
-	 * @throws WrapperException
-	 */
-	function Error($msg) {
-		$this->throwException($msg);
-	}
+    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    // OVERWRITES
+    // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
+    /**
+     * Throws an exception instead of terminating the script on error
+     *
+     * @param string $msg
+     * @throws WrapperException
+     */
+    function Error($msg)
+    {
+        $this->throwException($msg);
+    }
 }
 
