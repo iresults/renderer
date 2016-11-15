@@ -346,7 +346,7 @@ class MpdfWrapper extends BaseMpdf
             return;
         }
 
-        /*-- CJK-FONTS --*/
+        /* -- CJK-FONTS -- */
         if (in_array($family, $this->available_CJK_fonts)) {
             if (empty($this->Big5_widths)) {
                 require(_MPDF_PATH . 'includes/CJKdata.php');
@@ -354,11 +354,10 @@ class MpdfWrapper extends BaseMpdf
             $this->AddCJKFont($family); // don't need to add style
             return;
         }
-        /*-- END CJK-FONTS --*/
+        /* -- END CJK-FONTS -- */
 
-        // IRESULTS - COD MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMW
         if ($this->usingCoreFont) {
-            $this->throwException("mPDF Error - problem with Font management");
+            throw new MpdfException("mPDF Error - problem with Font management");
         }
 
         $stylekey = $style;
@@ -367,22 +366,30 @@ class MpdfWrapper extends BaseMpdf
         }
 
         if (!isset($this->fontdata[$family][$stylekey]) || !$this->fontdata[$family][$stylekey]) {
-            $this->throwException('mPDF Error - Font is not supported - ' . $family . ' ' . $style);
+            throw new MpdfException('mPDF Error - Font is not supported - ' . $family . ' ' . $style);
         }
-        // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
 
         $name = '';
         $originalsize = 0;
         $sip = false;
         $smp = false;
-        $unAGlyphs = false; // mPDF 5.4.05
+        $useOTL = 0; // mPDF 5.7.1
+        $fontmetrics = ''; // mPDF 6
         $haskerninfo = false;
+        $haskernGPOS = false;
+        $hassmallcapsGSUB = false;
         $BMPselected = false;
-        @include(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php');
+        $GSUBScriptLang = array();
+        $GSUBFeatures = array();
+        $GSUBLookups = array();
+        $GPOSScriptLang = array();
+        $GPOSFeatures = array();
+        $GPOSLookups = array();
+        if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php')) {
+            include(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php');
+        }
 
         $ttffile = '';
-        // IRESULTS - COD MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMW
-        /*
         if (defined('_MPDF_SYSTEM_TTFONTS')) {
             $ttffile = _MPDF_SYSTEM_TTFONTS . $this->fontdata[$family][$stylekey];
             if (!file_exists($ttffile)) {
@@ -390,22 +397,11 @@ class MpdfWrapper extends BaseMpdf
             }
         }
         if (!$ttffile) {
-            $ttffile = _MPDF_TTFONTPATH . $this->fontdata[$family][$stylekey];
+            $ttffile = $this->getPathForFont($this->fontdata[$family][$stylekey]);
             if (!file_exists($ttffile)) {
-                die("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
+                throw new MpdfException("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
             }
         }
-        */
-
-        $ttffile = $this->getPathForFont($this->fontdata[$family][$stylekey]);
-        if ($ttffile === null) {
-            throw new InvalidFontPathException(
-                'Font file "' . $this->fontdata[$family][$stylekey] . '" not found',
-                1392640103
-            );
-        }
-        // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
-
         $ttfstat = stat($ttffile);
 
         if (isset($this->fontdata[$family]['TTCfontID'][$stylekey])) {
@@ -422,68 +418,76 @@ class MpdfWrapper extends BaseMpdf
         $regenerate = false;
         if ($BMPonly && !$BMPselected) {
             $regenerate = true;
-        } else {
-            if (!$BMPonly && $BMPselected) {
-                $regenerate = true;
-            }
-        }
-        if ($this->useKerning && !$haskerninfo) {
+        } elseif (!$BMPonly && $BMPselected) {
             $regenerate = true;
         }
-        // mPDF 5.4.05
-        if (isset($this->fontdata[$family]['unAGlyphs']) && $this->fontdata[$family]['unAGlyphs'] && !$unAGlyphs) {
+        // mPDF 5.7.1
+        if (isset($this->fontdata[$family]['useOTL']) && $this->fontdata[$family]['useOTL'] && $useOTL != $this->fontdata[$family]['useOTL']) {
             $regenerate = true;
-            $unAGlyphs = true;
-        } else {
-            if ((!isset($this->fontdata[$family]['unAGlyphs']) || !$this->fontdata[$family]['unAGlyphs']) && $unAGlyphs) {
-                $regenerate = true;
-                $unAGlyphs = false;
-            }
+            $useOTL = $this->fontdata[$family]['useOTL'];
+        } elseif ((!isset($this->fontdata[$family]['useOTL']) || !$this->fontdata[$family]['useOTL']) && $useOTL) {
+            $regenerate = true;
+            $useOTL = 0;
         }
+        if (_FONT_DESCRIPTOR != $fontmetrics) {
+            $regenerate = true;
+        } // mPDF 6
         if (!isset($name) || $originalsize != $ttfstat['size'] || $regenerate) {
             if (!class_exists('TTFontFile', false)) {
                 include(_MPDF_PATH . 'classes/ttfontsuni.php');
             }
             $ttf = new TTFontFile();
-            $ttf->getMetrics(
-                $ttffile,
-                $TTCfontID,
-                $this->debugfonts,
-                $BMPonly,
-                $this->useKerning,
-                $unAGlyphs
-            ); // mPDF 5.4.05
+            $ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $this->debugfonts, $BMPonly, $useOTL); // mPDF 5.7.1
             $cw = $ttf->charWidths;
             $kerninfo = $ttf->kerninfo;
-            $haskerninfo = true;
+            if ($kerninfo) {
+                $haskerninfo = true;
+            }
+            $haskernGPOS = $ttf->haskernGPOS;
+            $hassmallcapsGSUB = $ttf->hassmallcapsGSUB;
             $name = preg_replace('/[ ()]/', '', $ttf->fullName);
             $sip = $ttf->sipset;
             $smp = $ttf->smpset;
+            // mPDF 6
+            $GSUBScriptLang = $ttf->GSUBScriptLang;
+            $GSUBFeatures = $ttf->GSUBFeatures;
+            $GSUBLookups = $ttf->GSUBLookups;
+            $rtlPUAstr = $ttf->rtlPUAstr;
+            $GPOSScriptLang = $ttf->GPOSScriptLang;
+            $GPOSFeatures = $ttf->GPOSFeatures;
+            $GPOSLookups = $ttf->GPOSLookups;
+            $glyphIDtoUni = $ttf->glyphIDtoUni;
+
 
             $desc = array(
-                'Ascent'       => round($ttf->ascent),
-                'Descent'      => round($ttf->descent),
                 'CapHeight'    => round($ttf->capHeight),
-                'Flags'        => $ttf->flags,
+                'XHeight'      => round($ttf->xHeight),
                 'FontBBox'     => '[' . round($ttf->bbox[0]) . " " . round($ttf->bbox[1]) . " " . round(
                         $ttf->bbox[2]
-                    ) . " " . round(
-                        $ttf->bbox[3]
-                    ) . ']',
+                    ) . " " . round($ttf->bbox[3]) . ']',
+                /* FontBBox from head table */
+
+                /* 		'MaxWidth' => round($ttf->advanceWidthMax),	// AdvanceWidthMax from hhea table	NB ArialUnicode MS = 31990 ! */
+                'Flags'        => $ttf->flags,
+                'Ascent'       => round($ttf->ascent),
+                'Descent'      => round($ttf->descent),
+                'Leading'      => round($ttf->lineGap),
                 'ItalicAngle'  => $ttf->italicAngle,
                 'StemV'        => round($ttf->stemV),
                 'MissingWidth' => round($ttf->defaultWidth),
             );
             $panose = '';
-            // mPDF 5.5.19
             if (count($ttf->panose)) {
                 $panoseArray = array_merge(array($ttf->sFamilyClass, $ttf->sFamilySubClass), $ttf->panose);
                 foreach ($panoseArray as $value) {
                     $panose .= ' ' . dechex($value);
                 }
             }
+            $unitsPerEm = round($ttf->unitsPerEm);
             $up = round($ttf->underlinePosition);
             $ut = round($ttf->underlineThickness);
+            $strp = round($ttf->strikeoutPosition); // mPDF 6
+            $strs = round($ttf->strikeoutSize); // mPDF 6
             $originalsize = $ttfstat['size'] + 0;
             $type = 'TTF';
             //Generate metrics .php file
@@ -491,8 +495,11 @@ class MpdfWrapper extends BaseMpdf
             $s .= '$name=\'' . $name . "';\n";
             $s .= '$type=\'' . $type . "';\n";
             $s .= '$desc=' . var_export($desc, true) . ";\n";
+            $s .= '$unitsPerEm=' . $unitsPerEm . ";\n";
             $s .= '$up=' . $up . ";\n";
             $s .= '$ut=' . $ut . ";\n";
+            $s .= '$strp=' . $strp . ";\n"; // mPDF 6
+            $s .= '$strs=' . $strs . ";\n"; // mPDF 6
             $s .= '$ttffile=\'' . $ttffile . "';\n";
             $s .= '$TTCfontID=\'' . $TTCfontID . "';\n";
             $s .= '$originalsize=' . $originalsize . ";\n";
@@ -513,17 +520,64 @@ class MpdfWrapper extends BaseMpdf
             }
             $s .= '$fontkey=\'' . $fontkey . "';\n";
             $s .= '$panose=\'' . $panose . "';\n";
-            if ($this->useKerning) {
-                $s .= '$kerninfo=' . var_export($kerninfo, true) . ";\n";
+            if ($haskerninfo) {
                 $s .= '$haskerninfo=true;' . "\n";
             } else {
                 $s .= '$haskerninfo=false;' . "\n";
             }
-            // mPDF 5.4.05
-            if ($this->fontdata[$family]['unAGlyphs']) {
-                $s .= '$unAGlyphs=true;' . "\n";
+            if ($haskernGPOS) {
+                $s .= '$haskernGPOS=true;' . "\n";
             } else {
-                $s .= '$unAGlyphs=false;' . "\n";
+                $s .= '$haskernGPOS=false;' . "\n";
+            }
+            if ($hassmallcapsGSUB) {
+                $s .= '$hassmallcapsGSUB=true;' . "\n";
+            } else {
+                $s .= '$hassmallcapsGSUB=false;' . "\n";
+            }
+            $s .= '$fontmetrics=\'' . _FONT_DESCRIPTOR . "';\n"; // mPDF 6
+
+            $s .= '// TypoAscender/TypoDescender/TypoLineGap = ' . round($ttf->typoAscender) . ', ' . round(
+                    $ttf->typoDescender
+                ) . ', ' . round($ttf->typoLineGap) . "\n";
+            $s .= '// usWinAscent/usWinDescent = ' . round($ttf->usWinAscent) . ', ' . round(
+                    -$ttf->usWinDescent
+                ) . "\n";
+            $s .= '// hhea Ascent/Descent/LineGap = ' . round($ttf->hheaascent) . ', ' . round(
+                    $ttf->hheadescent
+                ) . ', ' . round($ttf->hhealineGap) . "\n";
+
+            //  mPDF 5.7.1
+            if (isset($this->fontdata[$family]['useOTL'])) {
+                $s .= '$useOTL=' . $this->fontdata[$family]['useOTL'] . ';' . "\n";
+            } else {
+                $s .= '$useOTL=0x0000;' . "\n";
+            }
+            if ($rtlPUAstr) {
+                $s .= '$rtlPUAstr=\'' . $rtlPUAstr . "';\n";
+            } else {
+                $s .= '$rtlPUAstr=\'\';' . "\n";
+            }
+            if (count($GSUBScriptLang)) {
+                $s .= '$GSUBScriptLang=' . var_export($GSUBScriptLang, true) . ";\n";
+            }
+            if (count($GSUBFeatures)) {
+                $s .= '$GSUBFeatures=' . var_export($GSUBFeatures, true) . ";\n";
+            }
+            if (count($GSUBLookups)) {
+                $s .= '$GSUBLookups=' . var_export($GSUBLookups, true) . ";\n";
+            }
+            if (count($GPOSScriptLang)) {
+                $s .= '$GPOSScriptLang=' . var_export($GPOSScriptLang, true) . ";\n";
+            }
+            if (count($GPOSFeatures)) {
+                $s .= '$GPOSFeatures=' . var_export($GPOSFeatures, true) . ";\n";
+            }
+            if (count($GPOSLookups)) {
+                $s .= '$GPOSLookups=' . var_export($GPOSLookups, true) . ";\n";
+            }
+            if ($kerninfo) {
+                $s .= '$kerninfo=' . var_export($kerninfo, true) . ";\n";
             }
             $s .= "?>";
             if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
@@ -533,82 +587,146 @@ class MpdfWrapper extends BaseMpdf
                 $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat', "wb");
                 fwrite($fh, $cw, strlen($cw));
                 fclose($fh);
-                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm');
-                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.z');
-                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php');
-                @unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw');
-            } else {
-                if ($this->debugfonts) {
-                    $this->Error('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
+                // mPDF 5.7.1
+                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat', "wb");
+                fwrite($fh, $glyphIDtoUni, strlen($glyphIDtoUni));
+                fclose($fh);
+                if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm')) {
+                    unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm');
                 }
+                if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.z')) {
+                    unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.z');
+                }
+                if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php')) {
+                    unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw127.php');
+                }
+                if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cw')) {
+                    unlink(_MPDF_TTFONTDATAPATH . $fontkey . '.cw');
+                }
+            } elseif ($this->debugfonts) {
+                throw new MpdfException('Cannot write to the font caching directory - ' . _MPDF_TTFONTDATAPATH);
             }
             unset($ttf);
         } else {
-            $cw = @file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat');
+            $cw = '';
+            $glyphIDtoUni = '';
+            if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat')) {
+                $cw = file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat');
+            }
+            if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat')) {
+                $glyphIDtoUni = file_get_contents(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat');
+            }
         }
 
-        if (isset($this->fontdata[$family]['indic']) && $this->fontdata[$family]['indic']) {
-            $indic = true;
-        } else {
-            $indic = false;
+        /* -- OTL -- */
+        // mPDF 5.7.1
+        // Use OTL OpenType Table Layout - GSUB
+        if (isset($this->fontdata[$family]['useOTL']) && ($this->fontdata[$family]['useOTL'])) {
+            if (!class_exists('otl', false)) {
+                include(_MPDF_PATH . 'classes/otl.php');
+            }
+            if (empty($this->otl)) {
+                $this->otl = new \otl($this);
+            }
         }
+        /* -- END OTL -- */
+
         if (isset($this->fontdata[$family]['sip-ext']) && $this->fontdata[$family]['sip-ext']) {
             $sipext = $this->fontdata[$family]['sip-ext'];
         } else {
             $sipext = '';
         }
 
+        // Override with values from config_font.php
+        if (isset($this->fontdata[$family]['Ascent']) && $this->fontdata[$family]['Ascent']) {
+            $desc['Ascent'] = $this->fontdata[$family]['Ascent'];
+        }
+        if (isset($this->fontdata[$family]['Descent']) && $this->fontdata[$family]['Descent']) {
+            $desc['Descent'] = $this->fontdata[$family]['Descent'];
+        }
+        if (isset($this->fontdata[$family]['Leading']) && $this->fontdata[$family]['Leading']) {
+            $desc['Leading'] = $this->fontdata[$family]['Leading'];
+        }
+
 
         $i = count($this->fonts) + $this->extraFontSubsets + 1;
         if ($sip || $smp) {
             $this->fonts[$fontkey] = array(
-                'i'             => $i,
-                'type'          => $type,
-                'name'          => $name,
-                'desc'          => $desc,
-                'panose'        => $panose,
-                'up'            => $up,
-                'ut'            => $ut,
-                'cw'            => $cw,
-                'ttffile'       => $ttffile,
-                'fontkey'       => $fontkey,
-                'subsets'       => array(0 => range(0, 127)),
-                'subsetfontids' => array($i),
-                'used'          => false,
-                'indic'         => $indic,
-                'sip'           => $sip,
-                'sipext'        => $sipext,
-                'smp'           => $smp,
-                'TTCfontID'     => $TTCfontID,
-                'unAGlyphs'     => false,
-            ); // mPDF 5.4.05
+                'i'                => $i,
+                'type'             => $type,
+                'name'             => $name,
+                'desc'             => $desc,
+                'panose'           => $panose,
+                'unitsPerEm'       => $unitsPerEm,
+                'up'               => $up,
+                'ut'               => $ut,
+                'strs'             => $strs,
+                'strp'             => $strp,
+                'cw'               => $cw,
+                'ttffile'          => $ttffile,
+                'fontkey'          => $fontkey,
+                'subsets'          => array(0 => range(0, 127)),
+                'subsetfontids'    => array($i),
+                'used'             => false,
+                'sip'              => $sip,
+                'sipext'           => $sipext,
+                'smp'              => $smp,
+                'TTCfontID'        => $TTCfontID,
+                'useOTL'           => (isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false),
+                'useKashida'       => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false),
+                'GSUBScriptLang'   => $GSUBScriptLang,
+                'GSUBFeatures'     => $GSUBFeatures,
+                'GSUBLookups'      => $GSUBLookups,
+                'GPOSScriptLang'   => $GPOSScriptLang,
+                'GPOSFeatures'     => $GPOSFeatures,
+                'GPOSLookups'      => $GPOSLookups,
+                'rtlPUAstr'        => $rtlPUAstr,
+                'glyphIDtoUni'     => $glyphIDtoUni,
+                'haskerninfo'      => $haskerninfo,
+                'haskernGPOS'      => $haskernGPOS,
+                'hassmallcapsGSUB' => $hassmallcapsGSUB,
+            ); // mPDF 5.7.1	// mPDF 6
         } else {
             $ss = array();
             for ($s = 32; $s < 128; $s++) {
                 $ss[$s] = $s;
             }
             $this->fonts[$fontkey] = array(
-                'i'         => $i,
-                'type'      => $type,
-                'name'      => $name,
-                'desc'      => $desc,
-                'panose'    => $panose,
-                'up'        => $up,
-                'ut'        => $ut,
-                'cw'        => $cw,
-                'ttffile'   => $ttffile,
-                'fontkey'   => $fontkey,
-                'subset'    => $ss,
-                'used'      => false,
-                'indic'     => $indic,
-                'sip'       => $sip,
-                'sipext'    => $sipext,
-                'smp'       => $smp,
-                'TTCfontID' => $TTCfontID,
-                'unAGlyphs' => $unAGlyphs,
-            ); // mPDF 5.4.05
+                'i'                => $i,
+                'type'             => $type,
+                'name'             => $name,
+                'desc'             => $desc,
+                'panose'           => $panose,
+                'unitsPerEm'       => $unitsPerEm,
+                'up'               => $up,
+                'ut'               => $ut,
+                'strs'             => $strs,
+                'strp'             => $strp,
+                'cw'               => $cw,
+                'ttffile'          => $ttffile,
+                'fontkey'          => $fontkey,
+                'subset'           => $ss,
+                'used'             => false,
+                'sip'              => $sip,
+                'sipext'           => $sipext,
+                'smp'              => $smp,
+                'TTCfontID'        => $TTCfontID,
+                'useOTL'           => (isset($this->fontdata[$family]['useOTL']) ? $this->fontdata[$family]['useOTL'] : false),
+                'useKashida'       => (isset($this->fontdata[$family]['useKashida']) ? $this->fontdata[$family]['useKashida'] : false),
+                'GSUBScriptLang'   => $GSUBScriptLang,
+                'GSUBFeatures'     => $GSUBFeatures,
+                'GSUBLookups'      => $GSUBLookups,
+                'GPOSScriptLang'   => $GPOSScriptLang,
+                'GPOSFeatures'     => $GPOSFeatures,
+                'GPOSLookups'      => $GPOSLookups,
+                'rtlPUAstr'        => $rtlPUAstr,
+                'glyphIDtoUni'     => $glyphIDtoUni,
+                'haskerninfo'      => $haskerninfo,
+                'haskernGPOS'      => $haskernGPOS,
+                'hassmallcapsGSUB' => $hassmallcapsGSUB,
+            ); // mPDF 5.7.1	// mPDF 6
         }
-        if ($this->useKerning && $haskerninfo) {
+        if ($haskerninfo) {
             $this->fonts[$fontkey]['kerninfo'] = $kerninfo;
         }
         $this->FontFiles[$fontkey] = array(
