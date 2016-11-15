@@ -117,7 +117,7 @@ class MpdfWrapper extends BaseMpdf
     /**
      * Returns the paths to directories where fonts are stored in
      *
-     * @return array<string>
+     * @return string[]
      */
     public function getFontDirectoryPaths()
     {
@@ -127,7 +127,7 @@ class MpdfWrapper extends BaseMpdf
     /**
      * Sets the paths to directories where fonts are stored in
      *
-     * @param array <string> $fontDirectoryPaths
+     * @param string[] $fontDirectoryPaths
      * @return $this
      */
     public function setFontDirectoryPaths($fontDirectoryPaths)
@@ -202,7 +202,7 @@ class MpdfWrapper extends BaseMpdf
 
             $this->fontdata = array_merge_recursive($this->fontdata, $fontDataCollection);
 
-            foreach ($fontDataCollection AS $fontName => $fontData) {
+            foreach ($fontDataCollection as $fontName => $fontData) {
                 if (isset($fontData['R']) && $fontData['R']) {
                     $this->available_unifonts[] = $fontName;
                 }
