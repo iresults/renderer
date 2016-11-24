@@ -61,4 +61,30 @@ trait AssertionTrait
     {
         Assertion::assertPdf($path, $message);
     }
+
+    /**
+     * Tests if the given PDF contains the given raw content
+     *
+     * @param string $path
+     * @param string $content
+     * @param string $message
+     * @throws \AssertionError if the assertion failed
+     */
+    public static function assertPdfContainsRawContent($path, $content, $message = '')
+    {
+        Assertion::assertPdfContainsRawContent($path, $content, $message);
+    }
+
+    /**
+     * Tests if the given PDF does not contain the given raw content
+     *
+     * @param string $path
+     * @param string $content
+     * @param string $message
+     * @throws \AssertionError if the assertion failed
+     */
+    public static function assertPdfNotContainsRawContent($path, $content, $message = '')
+    {
+        Assertion::assertPdfNotContainsRawContent($path, $content, $message);
+    }
 }

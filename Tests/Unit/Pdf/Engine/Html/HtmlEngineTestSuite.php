@@ -10,9 +10,13 @@ namespace Iresults\Renderer\Tests\Unit\Pdf\Engine\Html;
 
 
 use Iresults\Renderer\Pdf\Engine\Html\HtmlInterface;
+use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
+use Iresults\Renderer\Tests\Unit\Pdf\AssertionTrait;
 
 trait HtmlEngineTestSuite
 {
+    use AssertionTrait;
+
     /**
      * @return HtmlInterface
      */
@@ -88,6 +92,36 @@ trait HtmlEngineTestSuite
     }
 
     /**
+     * Builds a temporary PDF with the given body
+     *
+     * @param string        $body            HTML body to write to the PDF
+     * @param boolean       $useTemplateFile Save the body into a file
+     * @param callable|null $configureEngine Callback to configure the PDF
+     * @return string Returns the save path
+     */
+    protected function pdfWithBody($body, $useTemplateFile, callable $configureEngine = null)
+    {
+        $engine = $this->buildEngine();
+        $pdfPath = $this->getTempPath();
+        $engine->setSavePath($pdfPath);
+
+        // Generate the PDF from the template file
+        if ($useTemplateFile) {
+            $templatePath = $this->getTempPath();
+            file_put_contents($templatePath, $body);
+            $engine->setTemplatePath($templatePath);
+        } else {
+            $engine->setTemplate($body);
+        }
+
+        $configureEngine($engine, $pdfPath);
+
+        $engine->save();
+
+        return $pdfPath;
+    }
+
+    /**
      * @test
      */
     public function generateSinglePagePdfTest()
@@ -155,6 +189,119 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
+    public function generateMultiPagePdfWithInlineHeaderTest()
+    {
+        $header = 'This is the header';
+        $this->pdfWithTextsCountAndBody([$header => 4], $this->getLongMultiPageBodyWithHeader($header));
+    }
+
+    /**
+     * @test
+     */
+    public function generateMultiPagePdfWithInlineHeaderAndCustomContextTest()
+    {
+        $header = 'This is the header';
+
+        $this->pdfWithTextsCountAndBody(
+            [$header => 4],
+            $this->getLongMultiPageBodyWithHeader($header),
+            function (HtmlInterface $engine) {
+                $engine->setContext($this->getContext());
+            }
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function generatePdfWithCustomFontTest()
+    {
+        // DejaVuSerif
+
+        $body = /** @lang html */
+            <<<BODY
+<html><body>
+<section><p style='color: blue'>This is the testing text that should be written in the PDF in <strong>Fira</strong></p></section>
+</body></html>
+BODY;
+        $savePath = $this->pdfWithBody(
+            $body,
+            false,
+            function (HtmlInterface $engine) {
+                $engine->setStyles(" body, * {font-family: 'Fira';}");
+                $engine->getContext()->addFontDirectoryPath(__DIR__ . '/../../../../Resources/FiraSans');
+                $engine->getContext()->registerFont(
+                    'fira',
+                    array(
+                        'R' => 'FiraSans-Thin.ttf',
+                        'B' => 'FiraSans-Bold.ttf',
+                    )
+                );
+            }
+        );
+
+        $this->assertPdfContainsRawContent($savePath, '+FiraSans-Thin');
+    }
+
+    /**
+     * @test
+     */
+    public function generatePdfWithCustomContextAndFontTest()
+    {
+        $body = /** @lang html */
+            <<<BODY
+<html><body>
+<section><p style='color: blue'>This is the testing text that should be written in the PDF in <strong>Fira</strong></p></section>
+</body></html>
+BODY;
+        $savePath = $this->pdfWithBody(
+            $body,
+            false,
+            function (HtmlInterface $engine) {
+                $engine->setContext($this->getContext('fira'));
+                $engine->setStyles(" body, * {font-family: 'Fira';}");
+                $engine->getContext()->addFontDirectoryPath(__DIR__ . '/../../../../Resources/FiraSans');
+                $engine->getContext()->registerFont(
+                    'fira',
+                    array(
+                        'R' => 'FiraSans-Thin.ttf',
+                        'B' => 'FiraSans-Bold.ttf',
+                    )
+                );
+            }
+        );
+
+        $this->assertPdfContainsRawContent($savePath, '+FiraSans-Thin');
+    }
+
+    /**
+     * @test
+     */
+    public function generateMultiPagePdfWithInlineHeaderAndCustomContextAndFontTest()
+    {
+        $header = 'This is the header';
+
+        $this->pdfWithTextsCountAndBody(
+            [$header => 4],
+            $this->getLongMultiPageBodyWithHeader($header),
+            function (HtmlInterface $engine) {
+                $engine->setContext($this->getContext('fira'));
+                $engine->setStyles(" body, * {font-family: 'Fira';}");
+                $engine->getContext()->addFontDirectoryPath(__DIR__ . '/../../../../Resources/FiraSans');
+                $engine->getContext()->registerFont(
+                    'fira',
+                    array(
+                        'R' => 'FiraSans-Thin.ttf',
+                        'B' => 'FiraSans-Bold.ttf',
+                    )
+                );
+            }
+        );
+    }
+
+    /**
+     * @test
+     */
     public function generateMultiPagePdfWithLongTextTest()
     {
         $footer = 'This is the footer';
@@ -186,6 +333,26 @@ trait HtmlEngineTestSuite
                 $engine->getContext()->SetHeader("<header>$header</header>");
                 $engine->getContext()->SetFooter("<footer>$footer</footer>");
             }
+        );
+    }
+
+    /**
+     * @param string $defaultFont
+     * @return MpdfWrapper
+     */
+    protected function getContext($defaultFont = '')
+    {
+        return new MpdfWrapper(
+            '',             // mode
+            'A4',           // format
+            14,             // default_font_size
+            $defaultFont,   // default_font
+            10,             // margin left
+            10,             // margin right
+            10,             // margin top
+            10,             // margin bottom
+            0,              // margin header
+            0               // margin footer
         );
     }
 
@@ -226,5 +393,25 @@ trait HtmlEngineTestSuite
     protected function getLongBodyTextHtml()
     {
         return nl2br($this->getLongBodyText());
+    }
+
+    /**
+     * @param $header
+     * @return string
+     */
+    private function getLongMultiPageBodyWithHeader($header)
+    {
+        return /** @lang html */
+            <<<BODY
+                   <html><body>
+<htmlpageheader name="header"><header>$header</header></htmlpageheader>
+<sethtmlpageheader name="header" value="on" show-this-page="1" />
+<section><p style='color: blue'>This is the testing text that should be written in the PDF on page 1</p></section>
+<pagebreak />
+<section><p style='color: red'>This should be written on page 2</p></section>
+<pagebreak />
+<section><p style='color: green'>{$this->getLongBodyTextHtml()}</p></section>
+</body></html>
+BODY;
     }
 }

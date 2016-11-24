@@ -41,9 +41,6 @@ abstract class Assertion
                 $message = $message ?: sprintf('Path "%s" does not contain "%s"', $path, $text);
 
                 test_flight_assert((strpos($content, $text) !== false), $message);
-                if (strpos($content, $text) === false) {
-                    throw new \AssertionError($message);
-                }
             } else {
                 $message = $message ?: sprintf(
                     'Path "%s" does not contain "%s" %d times but %d times',
@@ -54,10 +51,6 @@ abstract class Assertion
                 );
 
                 test_flight_assert_same($count, substr_count($content, $text), $message);
-
-                if (substr_count($content, $text) !== $count) {
-                    throw new \AssertionError($message);
-                }
             }
         }
     }
@@ -98,6 +91,52 @@ abstract class Assertion
     public static function assertPdfContainsText($path, $text, $message = '')
     {
         static::assertPdfContainsTexts($path, [$text], $message);
+    }
+
+    /**
+     * Tests if the given PDF contains the given text
+     *
+     * <code>
+     * $file = __DIR__ . '/../../Resources/code-pdf.pdf';
+     * \Iresults\Renderer\Tests\Unit\Pdf\Assertion::assertPdfContainsRawContent($file, '/FlateDecode')
+     * </code>
+     *
+     * @param string $path
+     * @param string $content
+     * @param string $message
+     * @throws \AssertionError if the assertion failed
+     */
+    public static function assertPdfContainsRawContent($path, $content, $message = '')
+    {
+        static::assertPdf($path, $message);
+
+        $fileContent = file_get_contents($path);
+        $message = $message ?: sprintf('Path "%s" does not contain "%s"', $path, $content);
+
+        test_flight_assert((strpos($fileContent, $content) !== false), $message);
+    }
+
+    /**
+     * Tests if the given PDF does not contain the given text
+     *
+     * <code>
+     * $file = __DIR__ . '/../../Resources/code-pdf.pdf';
+     * \Iresults\Renderer\Tests\Unit\Pdf\Assertion::assertPdfNotContainsRawContent($file, 'Some Text that should not occur')
+     * </code>
+     *
+     * @param string $path
+     * @param string $content
+     * @param string $message
+     * @throws \AssertionError if the assertion failed
+     */
+    public static function assertPdfNotContainsRawContent($path, $content, $message = '')
+    {
+        static::assertPdf($path, $message);
+
+        $fileContent = file_get_contents($path);
+        $message = $message ?: sprintf('Path "%s" does contain "%s"', $path, $content);
+
+        test_flight_assert_false(strpos($fileContent, $content), $message);
     }
 
     /**
