@@ -181,7 +181,7 @@ trait HtmlEngineTestSuite
                 'This should be written on page 2'
             ),
             function (HtmlInterface $engine) use ($footer) {
-                $engine->getContext()->SetFooter("<footer>$footer</footer>");
+                $engine->getContext()->SetHTMLFooter("<footer>$footer</footer>");
             }
         );
     }
@@ -309,7 +309,7 @@ BODY;
             [$footer => 2],
             $this->getLongBodyTextHtml(),
             function (HtmlInterface $engine) use ($footer) {
-                $engine->getContext()->SetFooter("<footer>$footer</footer>");
+                $engine->getContext()->SetHTMLFooter("<footer>$footer</footer>");
             }
         );
     }
@@ -330,8 +330,39 @@ BODY;
             [$header => 6, $footer => 6],
             $body,
             function (HtmlInterface $engine) use ($header, $footer) {
-                $engine->getContext()->SetHeader("<header>$header</header>");
-                $engine->getContext()->SetFooter("<footer>$footer</footer>");
+                $engine->getContext()->SetHTMLHeader("<header>$header</header>");
+                $engine->getContext()->SetHTMLFooter("<footer>$footer</footer>");
+            }
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function generatePdfWithLongTextAndManualPageBreakAndStylesTest()
+    {
+        $header = 'This is the header';
+        $footer = 'This is the footer';
+        $section = $this->getLongBodyTextHtml();
+        $body = sprintf(
+            '<html><body>%s</body></html>',
+            implode('<pagebreak />' . PHP_EOL, [$section, $section, $section,])
+        );
+        $this->pdfWithTextsCountAndBody(
+            [$header => 6, $footer => 6],
+            $body,
+            function (HtmlInterface $engine) use ($header, $footer) {
+                $engine->setStyles('
+@page {
+    header: html_testHeader;
+    footer: html_testFooter;
+    margin-top: 26mm;
+    margin-left: 28mm;
+    margin-right: 17mm;
+    margin-header: 5mm;
+}');
+                $engine->getContext()->DefHTMLHeaderByName('testHeader', "<header>$header</header>");
+                $engine->getContext()->DefHTMLFooterByName('testFooter', "<footer>$footer</footer>");
             }
         );
     }
