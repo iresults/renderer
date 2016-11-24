@@ -90,7 +90,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateFromBodyPdfTest()
+    public function generateSinglePagePdfTest()
     {
         $text = 'This is the testing text that should be written in the PDF';
 
@@ -103,7 +103,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generatePdfFromTemplateMultiPageTest()
+    public function generateMultiPagePdfTest()
     {
         $page1 = 'This is the testing text that should be written in the PDF on page 1';
         $page2 = 'This should be written on page 2';
@@ -117,7 +117,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generatePdfWithHeaderMultiPageTest()
+    public function generateMultiPagePdfWithHeaderTest()
     {
         $header = 'This is the header';
 
@@ -136,7 +136,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generatePdfWithFooterMultiPageTest()
+    public function generateMultiPagePdfWithFooterTest()
     {
         $footer = 'This is the footer';
 
@@ -155,13 +155,35 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generatePdfWithLongTextMultiPageTest()
+    public function generateMultiPagePdfWithLongTextTest()
     {
         $footer = 'This is the footer';
         $this->pdfWithTextsCountAndBody(
             [$footer => 2],
             $this->getLongBodyTextHtml(),
             function (HtmlInterface $engine) use ($footer) {
+                $engine->getContext()->SetFooter("<footer>$footer</footer>");
+            }
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function generatePdfWithLongTextAndManualPageBreakTest()
+    {
+        $header = 'This is the header';
+        $footer = 'This is the footer';
+        $section = $this->getLongBodyTextHtml();
+        $body = sprintf(
+            '<html><body>%s</body></html>',
+            implode('<pagebreak />' . PHP_EOL, [$section, $section, $section,])
+        );
+        $this->pdfWithTextsCountAndBody(
+            [$header => 6, $footer => 6],
+            $body,
+            function (HtmlInterface $engine) use ($header, $footer) {
+                $engine->getContext()->SetHeader("<header>$header</header>");
                 $engine->getContext()->SetFooter("<footer>$footer</footer>");
             }
         );
