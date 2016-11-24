@@ -9,11 +9,15 @@
 namespace Iresults\Renderer\Tests\Unit\Pdf\Engine\Html;
 
 
-use Iresults\Renderer\Pdf\Engine\Html\HtmlInterface;
 use Iresults\Renderer\Pdf\Engine\Html\MpdfHtml;
 
+/**
+ * @test
+ */
 class MpdfHtmlTest extends AbstractHtmlEngineCase
 {
+    use HtmlEngineTestSuite;
+
     public function buildEngine()
     {
         if (class_exists('mPDF')) {
@@ -24,6 +28,4 @@ class MpdfHtmlTest extends AbstractHtmlEngineCase
 
         return null;
     }
-
-
 }
