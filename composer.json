@@ -1,7 +1,9 @@
 {
     "name": "iresults/renderer",
     "description": "iresults interface to PHP office packages",
-    "license": ["MIT"],
+    "license": [
+        "MIT"
+    ],
     "type": "library",
     "authors": [
         {
@@ -23,10 +25,15 @@
             "Iresults\\Renderer": "Classes/"
         }
     },
+    "autoload-dev": {
+        "psr-4": { "Iresults\\Renderer\\Tests\\": "Tests/" }
+    },
     "suggest": {
         "phpoffice/phpword": "Allows Word Doc rendering",
         "mpdf/mpdf": "Allows PDF rendering from HTML"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.6",
+        "cundd/test-flight": "^0.2.6"
+    }
 }
-}
-
-
