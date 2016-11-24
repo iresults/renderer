@@ -19,6 +19,7 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
      *
      * @param array         $textsAndCount   Texts and expected number of occurrences
      * @param callable|null $configureEngine Callback to configure the PDF
+     * @return string Returns the save path
      */
     protected function pdfWithTextsCount(array $textsAndCount, callable $configureEngine = null)
     {
@@ -30,6 +31,8 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
 
         $engine->save();
         $this->assertPdfContainsTextsCount($pdfPath, $textsAndCount);
+
+        return $pdfPath;
     }
 
     /**
@@ -38,61 +41,52 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
      * @param array         $texts           Texts and expected number of occurrences
      * @param string        $body            HTML body to write to the PDF
      * @param callable|null $configureEngine Callback to configure the PDF
+     * @return string[] Returns the save paths
      */
     protected function pdfWithTextsCountAndBody(array $texts, $body, callable $configureEngine = null)
     {
-        $templatePath = $this->getTempPath();
-        file_put_contents($templatePath, $body);
-
         $configureEngine = $configureEngine ?: function () {
         };
 
-        $this->pdfWithTextsCount(
+        // Generate the PDF from the given HTML body
+        $pathFromHtmlBody = $this->pdfWithTextsCount(
             $texts,
             function (HtmlInterface $engine, $pdfPath) use ($configureEngine, $body) {
                 $engine->setTemplate($body);
                 $configureEngine($engine, $pdfPath);
             }
         );
-        $this->pdfWithTextsCount(
+
+        // Generate the PDF from the template file
+        $templatePath = $this->getTempPath();
+        file_put_contents($templatePath, $body);
+
+        $pathFromTemplate = $this->pdfWithTextsCount(
             $texts,
             function (HtmlInterface $engine, $pdfPath) use ($configureEngine, $templatePath) {
                 $engine->setTemplatePath($templatePath);
                 $configureEngine($engine, $pdfPath);
             }
         );
+
+        return [
+            $pathFromHtmlBody,
+            $pathFromTemplate,
+            'pathFromHtmlBody' => $pathFromHtmlBody,
+            'pathFromTemplate' => $pathFromTemplate,
+        ];
     }
 
     /**
      * @test
      */
-    public function generatePdfFromBodyTest()
+    public function generateFromBodyPdfTest()
     {
         $text = 'This is the testing text that should be written in the PDF';
 
-        $this->pdfWithTextsCount(
+        $this->pdfWithTextsCountAndBody(
             [$text => -1],
-            function (HtmlInterface $engine) use ($text) {
-                $engine->setTemplate($this->getBodySinglePage($text));
-            }
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function generatePdfFromTemplateTest()
-    {
-        $text = 'This is the testing text that should be written in the PDF';
-
-        $templatePath = $this->getTempPath();
-        file_put_contents($templatePath, $this->getBodySinglePage($text));
-
-        $this->pdfWithTextsCount(
-            [$text => -1],
-            function (HtmlInterface $engine) use ($templatePath) {
-                $engine->setTemplatePath($templatePath);
-            }
+            $this->getBodySinglePage($text)
         );
     }
 
@@ -113,7 +107,7 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
     /**
      * @test
      */
-    public function generatePdfFromBodyWithHeaderMultiPageTest()
+    public function generatePdfWithHeaderMultiPageTest()
     {
         $header = 'This is the header';
 
@@ -132,7 +126,7 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
     /**
      * @test
      */
-    public function generatePdfFromBodyWithFooterMultiPageTest()
+    public function generatePdfWithFooterMultiPageTest()
     {
         $footer = 'This is the footer';
 
@@ -142,6 +136,21 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
                 'This is the testing text that should be written in the PDF on page 1',
                 'This should be written on page 2'
             ),
+            function (HtmlInterface $engine) use ($footer) {
+                $engine->getContext()->SetFooter("<footer>$footer</footer>");
+            }
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function generatePdfWithLongTextMultiPageTest()
+    {
+        $footer = 'This is the footer';
+        $this->pdfWithTextsCountAndBody(
+            [$footer => 2],
+            $this->getLongBodyTextHtml(),
             function (HtmlInterface $engine) use ($footer) {
                 $engine->getContext()->SetFooter("<footer>$footer</footer>");
             }
@@ -169,5 +178,21 @@ abstract class AbstractHtmlEngineCase extends AbstractEngineCase
         }
 
         return sprintf('<html><body>%s</body></html>', implode('<pagebreak />' . PHP_EOL, $sections));
+    }
+
+    /**
+     * @return string
+     */
+    protected function getLongBodyText()
+    {
+        return file_get_contents(__DIR__ . '/../../../../Resources/text.txt');
+    }
+
+    /**
+     * @return string
+     */
+    protected function getLongBodyTextHtml()
+    {
+        return nl2br($this->getLongBodyText());
     }
 }
