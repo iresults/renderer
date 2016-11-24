@@ -27,14 +27,11 @@
  * @version	1.0.0
  */
 
-namespace Iresults\Renderer\Tests\Unit\Word;
+namespace Iresults\Renderer\Tests\Unit;
 
 // include __DIR__ . '/../../Classes/Iresults/Word/Renderer.php';
 
 
-\Tx_Iresults::loadClassFile('Tx_Iresults_Model');
-\Tx_Iresults::loadClassFile('Tx_Iresults_Helpers_ObjectHelper');
-\Tx_CunddComposer_Autoloader::register();
 
 #require_once __DIR__ . '/../../../cundd_composer/Classes/Autoloader.php';
 #\Cundd\Composer\Autoloader::register();
@@ -43,7 +40,6 @@ namespace Iresults\Renderer\Tests\Unit\Word;
 //	 require_once __DIR__ . '/../../Classes/' . str_replace('\\', '/', $class) . '.php';
 // });
 
-\Tx_Iresults::forceDebug();
 
 
 use Iresults\Renderer\Word\Renderer;
@@ -63,6 +59,10 @@ class WordTest extends \PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
+        if (!class_exists('PHPWord')) {
+            $this->markTestSkipped('Requires PHPWord to run');
+        }
+
         $this->savePath = tempnam(sys_get_temp_dir(), 'IWR');
     }
 
@@ -94,7 +94,7 @@ class WordTest extends \PHPUnit_Framework_TestCase
         /**
          * The renderer that encapsulates the template instance
          *
-         * @var Iresults\Renderer\Word\Renderer
+         * @var \Iresults\Renderer\Word\Renderer
          */
         $document = Renderer::rendererWithTemplate(__DIR__ . '/reference.docx');
 
