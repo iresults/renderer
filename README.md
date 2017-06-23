@@ -1,8 +1,42 @@
 PDF
 ===
 
+Installation
+------------
+
+Add the Renderer and Core to the Composer JSON file
+
+```json
+{
+    "require": {
+        "iresults/renderer": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://git.iresults.li/git/iresults/core.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/iresults/renderer.git"
+        }
+    ]
+}
+```
+
+
 Using the HTML engine
 ---------------------
+
+Add mpdf to the Composer JSON file
+
+```json
+{
+    "require": {
+        "mpdf/mpdf": "~6.1"
+    }
+}
+```
 
 ```php
 // Create the HTML Renderer instance
