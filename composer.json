@@ -7,6 +7,10 @@
     "type": "library",
     "authors": [
         {
+            "name": "Andreas Thurnheer-Meier",
+            "email": "tma@iresults.li"
+        },
+        {
             "name": "Daniel Corn",
             "email": "cod@iresults.li"
         }
@@ -14,19 +18,15 @@
     "require": {
         "iresults/core": "^3.2"
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://git.iresults.li/git/iresults/core.git"
-        }
-    ],
     "autoload": {
         "psr-0": {
             "Iresults\\Renderer": "Classes/"
         }
     },
     "autoload-dev": {
-        "psr-4": { "Iresults\\Renderer\\Tests\\": "Tests/" }
+        "psr-4": {
+            "Iresults\\Renderer\\Tests\\": "Tests/"
+        }
     },
     "suggest": {
         "phpoffice/phpword": "Allows Word Doc rendering",
