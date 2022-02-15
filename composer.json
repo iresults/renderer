@@ -19,13 +19,13 @@
         "iresults/core": "^3.2"
     },
     "autoload": {
-        "psr-0": {
-            "Iresults\\Renderer": "Classes/"
+        "psr-4": {
+            "Iresults\\Renderer": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Iresults\\Renderer\\Tests\\": "Tests/"
+            "Iresults\\Renderer\\Tests\\": "tests/"
         }
     },
     "suggest": {
