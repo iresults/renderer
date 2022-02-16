@@ -1,89 +1,61 @@
 <?php
+declare(strict_types=1);
+
 namespace Iresults\Renderer\Pdf\Engine;
 
-    /***************************************************************
-     *  Copyright notice
-     *
-     * (c) 2010 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
-     *            Daniel Corn <cod@iresults.li>, iresults
-     *  All rights reserved
-     *
-     *  This script is part of the TYPO3 project. The TYPO3 project is
-     *  free software; you can redistribute it and/or modify
-     *  it under the terms of the GNU General Public License as published by
-     *  the Free Software Foundation; either version 2 of the License, or
-     *  (at your option) any later version.
-     *
-     *  The GNU General Public License can be found at
-     *  http://www.gnu.org/copyleft/gpl.html.
-     *
-     *  This script is distributed in the hope that it will be useful,
-     *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-     *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     *  GNU General Public License for more details.
-     *
-     *  This copyright notice MUST APPEAR in all copies of the script!
-     ***************************************************************/
-
-
 /**
- * The interface describes the methods called on the delegate of a canvas engine.
- *
- * @author        Daniel Corn <cod@iresults.li>
- * @package       Iresults
- * @subpackage    Iresults_Renderer_Pdf_Canvas
+ * Interface describing the methods called on the delegate of a canvas engine
  */
 interface CanvasDelegateInterface
 {
     /**
-     * Invoked when no template was found in the original class.
-     * You may return a template script content to render.
+     * Invoked when no template was found in the original class
      *
-     * @return    string The template script to render
+     * May return a template script content to render.
+     *
+     * @return string|null The template script to render
      */
-    public function getTemplate();
+    public function getTemplate(): ?string;
 
     /**
-     * Invoked before the scripts are drawn.
+     * Invoked before the scripts are drawn
      *
-     * @return    void
+     * @return void
      */
-    public function willDraw();
+    public function willDraw(): void;
 
     /**
-     * Invoked at the end of the draw script.
+     * Invoked at the end of the draw script
      *
-     * @return    void
+     * @return void
      */
-    public function didDraw();
+    public function didDraw(): void;
 
     /**
-     * Invoked before the template script is loaded.
+     * Invoked before the template script is loaded
      *
-     * @return    void
+     * @return void
      */
-    public function willRender();
+    public function willRender(): void;
 
     /**
-     * Invoked when the PDF did render.
+     * Invoked when the PDF did render
      *
-     * @return    void
+     * @return void
      */
-    public function didRender();
+    public function didRender(): void;
 
     /**
-     * Invoked when the header should be rendered and no header script is found
-     * in the template.
+     * Invoked when the header should be rendered and no header script is found in the template
      *
-     * @return    void
+     * @return void
      */
-    public function header();
+    public function header(): void;
 
     /**
-     * Invoked when the footer should be rendered and no footer script is found
-     * in the template.
+     * Invoked when the footer should be rendered and no footer script is found in the template
      *
-     * @return    void
+     * @return void
      */
-    public function footer();
+    public function footer(): void;
 }

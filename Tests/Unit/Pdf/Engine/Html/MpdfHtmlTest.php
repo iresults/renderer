@@ -1,31 +1,22 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: cod
- * Date: 24.11.16
- * Time: 09:58
- */
+declare(strict_types=1);
 
 namespace Iresults\Renderer\Tests\Unit\Pdf\Engine\Html;
 
-
 use Iresults\Renderer\Pdf\Engine\Html\MpdfHtml;
+use Iresults\Renderer\RendererInterface;
+use function class_exists;
 
-/**
- * @test
- */
 class MpdfHtmlTest extends AbstractHtmlEngineCase
 {
     use HtmlEngineTestSuite;
 
-    public function buildEngine()
+    public function buildEngine(): RendererInterface
     {
-        if (class_exists('mPDF')) {
+        if (class_exists('mPDF') || class_exists(\Mpdf\Mpdf::class)) {
             return new MpdfHtml();
         }
 
         $this->markTestSkipped('Requires mPDF to run');
-
-        return null;
     }
 }

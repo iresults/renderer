@@ -1,16 +1,12 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: cod
- * Date: 24.11.16
- * Time: 13:34
- */
+declare(strict_types=1);
 
 namespace Iresults\Renderer\Tests\Unit\Pdf\Engine\Html;
 
-
 use Iresults\Renderer\Pdf\Engine\Html\HtmlInterface;
-use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
+use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper\MpdfWrapperInterface;
+use Iresults\Renderer\Pdf\Wrapper\MpdfWrapperFactory;
+use Iresults\Renderer\RendererInterface;
 use Iresults\Renderer\Tests\Unit\Pdf\AssertionTrait;
 
 trait HtmlEngineTestSuite
@@ -20,13 +16,13 @@ trait HtmlEngineTestSuite
     /**
      * @return HtmlInterface
      */
-    abstract public function buildEngine();
+    abstract public function buildEngine(): RendererInterface;
 
     /**
      * @param string $suffix
      * @return string
      */
-    abstract protected function getTempPath($suffix = 'pdf');
+    abstract protected function getTempPath(string $suffix = 'pdf'): string;
 
     /**
      * Builds a temporary PDF and checks if the texts have the correct number of occurrences
@@ -35,7 +31,7 @@ trait HtmlEngineTestSuite
      * @param callable|null $configureEngine Callback to configure the PDF
      * @return string Returns the save path
      */
-    protected function pdfWithTextsCount(array $textsAndCount, callable $configureEngine = null)
+    protected function pdfWithTextsCount(array $textsAndCount, callable $configureEngine = null): string
     {
         $engine = $this->buildEngine();
         $pdfPath = $this->getTempPath();
@@ -57,7 +53,7 @@ trait HtmlEngineTestSuite
      * @param callable|null $configureEngine Callback to configure the PDF
      * @return string[] Returns the save paths
      */
-    protected function pdfWithTextsCountAndBody(array $texts, $body, callable $configureEngine = null)
+    protected function pdfWithTextsCountAndBody(array $texts, $body, callable $configureEngine = null): array
     {
         $configureEngine = $configureEngine ?: function () {
         };
@@ -99,7 +95,7 @@ trait HtmlEngineTestSuite
      * @param callable|null $configureEngine Callback to configure the PDF
      * @return string Returns the save path
      */
-    protected function pdfWithBody($body, $useTemplateFile, callable $configureEngine = null)
+    protected function pdfWithBody($body, $useTemplateFile, callable $configureEngine = null): string
     {
         $engine = $this->buildEngine();
         $pdfPath = $this->getTempPath();
@@ -232,10 +228,10 @@ BODY;
                 $engine->getContext()->addFontDirectoryPath(__DIR__ . '/../../../../Resources/FiraSans');
                 $engine->getContext()->registerFont(
                     'fira',
-                    array(
+                    [
                         'R' => 'FiraSans-Thin.ttf',
                         'B' => 'FiraSans-Bold.ttf',
-                    )
+                    ]
                 );
             }
         );
@@ -263,10 +259,10 @@ BODY;
                 $engine->getContext()->addFontDirectoryPath(__DIR__ . '/../../../../Resources/FiraSans');
                 $engine->getContext()->registerFont(
                     'fira',
-                    array(
+                    [
                         'R' => 'FiraSans-Thin.ttf',
                         'B' => 'FiraSans-Bold.ttf',
-                    )
+                    ]
                 );
             }
         );
@@ -290,10 +286,10 @@ BODY;
                 $engine->getContext()->addFontDirectoryPath(__DIR__ . '/../../../../Resources/FiraSans');
                 $engine->getContext()->registerFont(
                     'fira',
-                    array(
+                    [
                         'R' => 'FiraSans-Thin.ttf',
                         'B' => 'FiraSans-Bold.ttf',
-                    )
+                    ]
                 );
             }
         );
@@ -352,7 +348,8 @@ BODY;
             [$header => 6, $footer => 6],
             $body,
             function (HtmlInterface $engine) use ($header, $footer) {
-                $engine->setStyles('
+                $engine->setStyles(
+                    '
 @page {
     header: html_testHeader;
     footer: html_testFooter;
@@ -360,7 +357,8 @@ BODY;
     margin-left: 28mm;
     margin-right: 17mm;
     margin-header: 5mm;
-}');
+}'
+                );
                 $engine->getContext()->DefHTMLHeaderByName('testHeader', "<header>$header</header>");
                 $engine->getContext()->DefHTMLFooterByName('testFooter', "<footer>$footer</footer>");
             }
@@ -369,40 +367,42 @@ BODY;
 
     /**
      * @param string $defaultFont
-     * @return MpdfWrapper
+     * @return MpdfWrapperInterface
      */
     protected function getContext($defaultFont = '')
     {
-        return new MpdfWrapper(
-            '',             // mode
-            'A4',           // format
-            14,             // default_font_size
-            $defaultFont,   // default_font
-            10,             // margin left
-            10,             // margin right
-            10,             // margin top
-            10,             // margin bottom
-            0,              // margin header
-            0               // margin footer
-        );
+        $factory = new MpdfWrapperFactory();
+
+        return $factory->build([
+            'mode'              => '',
+            'format'            => 'A4',
+            'default_font_size' => 14,
+            'default_font'      => $defaultFont,
+            'margin_left'       => 10,
+            'margin_right'      => 10,
+            'margin_top'        => 10,
+            'margin_bottom'     => 10,
+            'margin_header'     => 0,
+            'margin_footer'     => 0,
+        ]);
     }
 
     /**
-     * @param $text
+     * @param string $text
      * @return string
      */
-    protected function getBodySinglePage($text)
+    protected function getBodySinglePage(string $text): string
     {
         return "<html><body><section><p style='color: blue'>$text</p></section></body></html>";
     }
 
     /**
-     * @param string[] ...$pages
+     * @param string ...$pages
      * @return string
      */
-    protected function getBodyMultiPage(... $pages)
+    protected function getBodyMultiPage(...$pages): string
     {
-        $sections = array();
+        $sections = [];
         foreach ($pages as $page) {
             $sections[] = "<section><p style='color: blue'>$page</p></section>";
         }

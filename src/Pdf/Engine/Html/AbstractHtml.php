@@ -1,37 +1,10 @@
 <?php
-namespace Iresults\Renderer\Pdf\Engine\Html;
+declare(strict_types=1);
 
-/*
- *  Copyright notice
- *
- *  (c) 2013 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
- *  Daniel Corn <cod@iresults.li>, iresults
- *
- *  All rights reserved
- *
- *  This script is part of the TYPO3 project. The TYPO3 project is
- *  free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  The GNU General Public License can be found at
- *  http://www.gnu.org/copyleft/gpl.html.
- *
- *  This script is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  This copyright notice MUST APPEAR in all copies of the script!
- */
+namespace Iresults\Renderer\Pdf\Engine\Html;
 
 use Iresults\Renderer\Exception\InvalidPathException;
 
-/**
- * @author COD
- * Created 09.10.13 11:07
- */
 abstract class AbstractHtml implements HtmlInterface
 {
     /**
@@ -88,27 +61,14 @@ abstract class AbstractHtml implements HtmlInterface
      */
     abstract protected function _render();
 
-    /**
-     * Initialize with the given template file path
-     *
-     * @param string $templatePath
-     * @return $this
-     */
-    public function initWithTemplate($templatePath)
+    public function initWithTemplate(string $templatePath): HtmlInterface
     {
         $this->templatePath = $templatePath;
 
         return $this;
     }
 
-    /**
-     * Writes the rendered data to the given path
-     *
-     * @param string $savePath The path to which the output will be written
-     * @param string $type     The type of the writer
-     * @throws InvalidPathException if no save path is defined
-     */
-    public function save($savePath = '', $type = null)
+    public function save(string $savePath = '', string $type = null): void
     {
         if (!$savePath) {
             $savePath = $this->getSavePath();
@@ -120,14 +80,7 @@ abstract class AbstractHtml implements HtmlInterface
         $this->getContext()->Output($savePath, 'F');
     }
 
-    /**
-     * Outputs the rendered data directly to the browser
-     *
-     * @param string $name This appears as the name of the downloaded file
-     * @param string $type The type of the writer
-     * @return void
-     */
-    public function output($name = '', $type = null)
+    public function output(string $name = '', string $type = null): void
     {
         if (!$name) {
             $name = basename($this->getSavePath());
@@ -139,26 +92,14 @@ abstract class AbstractHtml implements HtmlInterface
         $this->getContext()->Output($name, 'D');
     }
 
-    /**
-     * Outputs the rendered data directly to the browser.
-     *
-     * @param    string $name This appears as the name of the downloaded file
-     * @param   string  $type The type of the writer
-     * @return    void
-     */
-    public function outputAndExit($name = '', $type = null)
+    public function outputAndExit(string $name = '', string $type = null): void
     {
         $this->output($name, $type);
 
         exit();
     }
 
-    /**
-     * Render the template
-     *
-     * @return void
-     */
-    public function render()
+    public function render(): void
     {
         if ($this->_needsToRender) {
             $this->_render();
@@ -166,36 +107,19 @@ abstract class AbstractHtml implements HtmlInterface
         }
     }
 
-    /**
-     * Returns the path the file will be saved at
-     *
-     * @return string
-     */
-    public function getSavePath()
+    public function getSavePath(): string
     {
         return $this->savePath;
     }
 
-    /**
-     * Sets the path the file will be saved at
-     *
-     * @param String $savePath
-     * @return $this
-     */
-    public function setSavePath($savePath)
+    public function setSavePath(string $savePath): \Iresults\Renderer\RendererInterface
     {
         $this->savePath = $savePath;
 
         return $this;
     }
 
-    /**
-     * Set the current rendering context (i.e. a section or page)
-     *
-     * @param mixed $context
-     * @return $this
-     */
-    public function setContext($context)
+    public function setContext($context): object
     {
         $this->_needsToRender = true;
         $this->context = $context;
@@ -203,12 +127,7 @@ abstract class AbstractHtml implements HtmlInterface
         return $this;
     }
 
-    /**
-     * Returns the HTML template to be rendered
-     *
-     * @return string
-     */
-    public function getTemplate()
+    public function getTemplate(): string
     {
         if (!$this->template) {
             if ($this->templatePath) {
@@ -219,13 +138,7 @@ abstract class AbstractHtml implements HtmlInterface
         return $this->template;
     }
 
-    /**
-     * Sets the HTML template to be rendered
-     *
-     * @param string $template
-     * @return $this
-     */
-    public function setTemplate($template)
+    public function setTemplate(string $template): HtmlInterface
     {
         $this->_needsToRender = true;
         $this->template = $template;
@@ -233,14 +146,7 @@ abstract class AbstractHtml implements HtmlInterface
         return $this;
     }
 
-    /**
-     * Sets the path to the HTML template to be rendered
-     *
-     * @param string $templatePath
-     * @return $this
-     * @throws \Iresults\Renderer\Exception\InvalidPathException if the given path does not exist or is not readable
-     */
-    public function setTemplatePath($templatePath)
+    public function setTemplatePath(string $templatePath): HtmlInterface
     {
         $this->_needsToRender = true;
 
@@ -262,23 +168,12 @@ abstract class AbstractHtml implements HtmlInterface
         return $this;
     }
 
-    /**
-     * Returns the path to the HTML template to be rendered
-     *
-     * @return string
-     */
-    public function getTemplatePath()
+    public function getTemplatePath(): string
     {
         return $this->templatePath;
     }
 
-    /**
-     * Adds the given styles to the PDF
-     *
-     * @param string $styles Either a file path or the styles as string
-     * @return $this
-     */
-    public function setStyles($styles)
+    public function setStyles(string $styles): HtmlInterface
     {
         $this->_needsToRender = true;
 
@@ -291,12 +186,7 @@ abstract class AbstractHtml implements HtmlInterface
         return $this;
     }
 
-    /**
-     * Returns the HTML template to be rendered
-     *
-     * @return string
-     */
-    public function getStyles()
+    public function getStyles(): string
     {
         if (!$this->styles) {
             if ($this->stylesPath) {
@@ -307,14 +197,7 @@ abstract class AbstractHtml implements HtmlInterface
         return $this->styles;
     }
 
-    /**
-     * Sets the path to the styles to be added to the PDF
-     *
-     * @param string $stylesPath
-     * @return $this
-     * @throws \Iresults\Renderer\Exception\InvalidPathException if the given path does not exist or is not readable
-     */
-    public function setStylesPath($stylesPath)
+    public function setStylesPath(string $stylesPath): HtmlInterface
     {
         $this->_needsToRender = true;
 
@@ -335,24 +218,19 @@ abstract class AbstractHtml implements HtmlInterface
         return $this;
     }
 
-    /**
-     * Returns the path to the styles to be added to the PDF
-     *
-     * @return string
-     */
-    public function getStylesPath()
+    public function getStylesPath(): string
     {
         return $this->stylesPath;
     }
 
     /**
-     * Sends the headers for direct output of the rendered data.
+     * Send the headers for direct output of the rendered data.
      *
-     * @param    string $name This appears as the name of the downloaded file
-     * @param   string  $type Type for which to send the header
-     * @return    boolean Returns TRUE if the headers are successfully sent, else FALSE
+     * @param string $name This appears as the name of the downloaded file
+     * @param null   $type Type for which to send the header
+     * @return void
      */
-    public function sendHeaders($name, $type = null)
+    public function sendHeaders(string $name, $type = null): void
     {
         // Will be sent by mPDF
     }

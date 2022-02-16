@@ -1,13 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: cod
- * Date: 24.11.16
- * Time: 10:14
- */
+declare(strict_types=1);
 
 namespace Iresults\Renderer\Tests\Unit\Pdf;
-
 
 trait AssertionTrait
 {
@@ -47,7 +41,7 @@ trait AssertionTrait
      */
     public static function assertPdfContainsText($path, $text, $message = '')
     {
-        Assertion::assertPdfContainsTexts($path, $text, $message);
+        Assertion::assertPdfContainsTexts($path, (array)$text, $message);
     }
 
     /**

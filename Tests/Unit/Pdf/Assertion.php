@@ -1,13 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: cod
- * Date: 23.11.16
- * Time: 17:52
- */
+declare(strict_types=1);
 
 namespace Iresults\Renderer\Tests\Unit\Pdf;
 
+use PHPUnit\Framework\Assert;
 
 abstract class Assertion
 {
@@ -32,9 +28,7 @@ abstract class Assertion
         $content = static::extractTextFromPdf($path);
 
         foreach ($textsAndCount as $text => $count) {
-            if (!is_numeric($count)) {
-                throw new \InvalidArgumentException(sprintf('Count "%s" is not numeric', $count));
-            }
+            Assert::assertIsNumeric($count);
             $count = intval($count);
             // If count is below 0 the count does not matter (text must occur at least once)
             if ($count < 0) {
@@ -113,7 +107,7 @@ abstract class Assertion
         $fileContent = file_get_contents($path);
         $message = $message ?: sprintf('Path "%s" does not contain "%s"', $path, $content);
 
-        test_flight_assert((strpos($fileContent, $content) !== false), $message);
+        Assert::assertTrue((strpos($fileContent, $content) !== false), $message);
     }
 
     /**
@@ -173,7 +167,6 @@ abstract class Assertion
         }
     }
 
-
     /**
      * Extract text from the given PDF
      *
@@ -193,8 +186,8 @@ abstract class Assertion
     /**
      * Executes a shell command and returns the output as array of lines
      *
-     * @param string $command
-     * @param array  ...$arguments
+     * @param string     $command
+     * @param string|int ...$arguments
      * @return string[]
      * @throws \RuntimeException if the exit code is non-zero
      */
