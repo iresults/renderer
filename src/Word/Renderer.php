@@ -1,40 +1,18 @@
 <?php
+declare(strict_types=1);
+
 namespace Iresults\Renderer\Word;
 
-/*
- * Copyright (c) 2013 Andreas Thurnheer-Meier <tma@iresults.li>, iresults
- *                    Daniel Corn <cod@iresults.li>, iresults
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * @copyright  Copyright (c) 2013
- * @license    http://opensource.org/licenses/MIT MIT
- * @version    1.0.0
- */
-
+use Iresults\Core\Iresults;
 use Iresults\Renderer\AbstractRenderer as AbstractRenderer;
+use Iresults\Renderer\RendererInterface;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\TemplateProcessor;
+use function sprintf;
 
 /**
  * The Word renderer
- *
- * @author     Daniel Corn <cod@iresults.li>
- * @package    Iresults\Word
  */
 class Renderer extends AbstractRenderer
 {
@@ -45,58 +23,56 @@ class Renderer extends AbstractRenderer
      */
     protected $defaultWriterType = 'Word2007';
 
-    /**
-     * Creates and prepares the driver instance
-     *
-     * @return \PHPWord Returns the driver
-     */
-    public function initializeDriver()
+    public function initializeDriver(): object
     {
-        $this->driver = new \PHPWord();
-        $this->context = $this->driver->createSection();
+        $this->driver = new PhpWord();
+        $this->context = $this->driver->addSection();
+
+        return $this->driver;
     }
 
     /**
-     * Returns a new writer instance
+     * Return a new writer instance
      *
-     * @param    string $type The type of the writer
-     * @return    \PHPWord_Writer_IWriter
+     * @param string|null $type The type of the writer
+     * @return object
      */
-    public function createWriter($type = null)
+    public function createWriter(string $type = null): object
     {
         if (!$type) {
             $type = $this->defaultWriterType;
         }
 
-        return \PHPWord_IOFactory::createWriter($this->getDriver(), $type);
+        return IOFactory::createWriter($this->getDriver(), $type);
     }
 
-    /**
-     * Sends the headers for direct output of the rendered data.
-     *
-     * @param    string $name This appears as the name of the downloaded file
-     * @param   string  $type Type for which to send the header
-     * @return    boolean Returns TRUE if the headers are successfully sent, else FALSE
-     */
-    public function sendHeaders($name, $type = null)
-    {
-        if (!$type) {
-            $type = $this->defaultWriterType;
-        }
-    }
+    ///**
+    // * Sends the headers for direct output of the rendered data.
+    // *
+    // * @param string      $name This appears as the name of the downloaded file
+    // * @param string|null $type Type for which to send the header
+    // * @return boolean Returns TRUE if the headers are successfully sent, else FALSE
+    // */
+    //public function sendHeaders(string $name, string $type = null)
+    //{
+    //    if (!$type) {
+    //        $type = $this->defaultWriterType;
+    //    }
+    //}
 
     /**
      * Initialize a new instance with the given template file path
      *
-     * @param  string $templateFilePath
-     * @return AbstractRenderer
+     * @param string $templateFilePath
+     * @return RendererInterface
      */
-    public function initWithTemplate($templateFilePath)
+    public function initWithTemplate(string $templateFilePath): RendererInterface
     {
-        $templateFilePath = \Iresults\Core\Iresults::getPathOfResource($templateFilePath);
+        $templateFilePath = Iresults::getPathOfResource($templateFilePath);
         if (!is_readable($templateFilePath)) {
             throw new \UnexpectedValueException(
-                'Template file "' . $templateFilePath . '" is not readable', 1360939616
+                sprintf('Template file "%s" is not readable', $templateFilePath),
+                1360939616
             );
         }
         $templateDriver = new Template($templateFilePath);
@@ -106,23 +82,12 @@ class Renderer extends AbstractRenderer
         return $this;
     }
 
-
-    /**
-     * Writes the rendered data to the given path.
-     *
-     * If a template was loaded the template object's save() method has to be
-     * used instead of a writer
-     *
-     * @param    string $savePath The path to which the output will be written
-     * @param   string  $type     The type of the writer
-     * @return    void
-     */
-    public function save($savePath = '', $type = null)
+    public function save(string $savePath = '', string $type = null): void
     {
         if (!$savePath) {
             $savePath = $this->getSavePath();
         }
-        if (is_a($this->getDriver(), 'PHPWord_Template')) {
+        if ($this->getDriver() instanceof TemplateProcessor) {
             $this->_callMethodIfExists('willSaveDocument');
             $this->getDriver()->save($savePath);
 
@@ -131,19 +96,12 @@ class Renderer extends AbstractRenderer
         parent::save($savePath, $type);
     }
 
-    /**
-     * Outputs the rendered data directly to the browser.
-     *
-     * @param    string $name This appears as the name of the downloaded file
-     * @param   string  $type The type of the writer
-     * @return    void
-     */
-    public function output($name = '', $type = null)
+    public function output(string $name = '', string $type = null): void
     {
         if (!$name) {
             $name = basename($this->getSavePath());
         }
-        if (is_a($this->getDriver(), 'PHPWord_Template')) {
+        if ($this->getDriver() instanceof TemplateProcessor) {
             $this->sendHeaders($name, $type);
 
             $this->_callMethodIfExists('willSaveDocument');
@@ -151,6 +109,6 @@ class Renderer extends AbstractRenderer
 
             return;
         }
-        parent::save($savePath, $type);
+        parent::save($name, $type);
     }
 }
