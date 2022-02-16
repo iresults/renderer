@@ -29,7 +29,6 @@
         }
     },
     "suggest": {
-        "phpoffice/phpword": "Allows Word Doc rendering",
         "mpdf/mpdf": "Allows PDF rendering from HTML"
     },
     "require-dev": {
