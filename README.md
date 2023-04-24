@@ -18,19 +18,20 @@ Add mpdf to the Composer JSON file
 // Create the HTML Renderer instance
 $pdfRenderer = \Iresults\Renderer\Pdf\Engine\Html\HtmlFactory::renderer();
 
+$factory = new \Iresults\Renderer\Pdf\Wrapper\MpdfWrapperFactory();
 // Set a different context object [optional]
-$context = new \Iresults\Renderer\Pdf\Wrapper\MpdfWrapper(
-	'',     // mode
-	'A4',   // format
-	10,     // default_font_size
-	'',     // default_font
-	0,      // margin left
-	0,      // margin right
-	40,     // margin top
-	20,     // margin bottom
-	0,      // margin header
-	0       // margin footer
-);
+$context = $factory->build([
+    'mode'              => '',
+    'format'            => 'A4',
+    'default_font_size' => 10,
+    'default_font'      => '',
+    'margin_left'       => 0,
+    'margin_right'      => 0,
+    'margin_top'        => 40,
+    'margin_bottom'     => 20,
+    'margin_header'     => 0,
+    'margin_footer'     => 0,
+])
 $pdfRenderer->setContext($context);
 
 
