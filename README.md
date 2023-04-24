@@ -9,7 +9,7 @@ Add mpdf to the Composer JSON file
 ```json
 {
     "require": {
-        "mpdf/mpdf": "~6.1"
+        "mpdf/mpdf": "^8.0"
     }
 }
 ```
