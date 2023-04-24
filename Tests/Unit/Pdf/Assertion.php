@@ -4,6 +4,12 @@ declare(strict_types=1);
 namespace Iresults\Renderer\Tests\Unit\Pdf;
 
 use PHPUnit\Framework\Assert;
+use function array_splice;
+use function exec;
+use function file_get_contents;
+use function implode;
+use function sprintf;
+use const PHP_EOL;
 
 abstract class Assertion
 {
@@ -23,7 +29,7 @@ abstract class Assertion
      * @param string   $message
      * @throws \AssertionError if the assertion failed
      */
-    public static function assertPdfContainsTextsCount($path, array $textsAndCount, $message = '')
+    public static function assertPdfContainsTextsCount($path, array $textsAndCount, $message = ''): void
     {
         $content = static::extractTextFromPdf($path);
 
@@ -62,7 +68,7 @@ abstract class Assertion
      * @param string   $message
      * @throws \AssertionError if the assertion failed
      */
-    public static function assertPdfContainsTexts($path, array $texts, $message = '')
+    public static function assertPdfContainsTexts($path, array $texts, $message = ''): void
     {
         $valuesArray = array_fill(0, count($texts), -1);
 
@@ -82,7 +88,7 @@ abstract class Assertion
      * @param string $message
      * @throws \AssertionError if the assertion failed
      */
-    public static function assertPdfContainsText($path, $text, $message = '')
+    public static function assertPdfContainsText($path, $text, $message = ''): void
     {
         static::assertPdfContainsTexts($path, [$text], $message);
     }
@@ -100,7 +106,7 @@ abstract class Assertion
      * @param string $message
      * @throws \AssertionError if the assertion failed
      */
-    public static function assertPdfContainsRawContent($path, $content, $message = '')
+    public static function assertPdfContainsRawContent($path, $content, $message = ''): void
     {
         static::assertPdf($path, $message);
 
@@ -123,7 +129,7 @@ abstract class Assertion
      * @param string $message
      * @throws \AssertionError if the assertion failed
      */
-    public static function assertPdfNotContainsRawContent($path, $content, $message = '')
+    public static function assertPdfNotContainsRawContent($path, $content, $message = ''): void
     {
         static::assertPdf($path, $message);
 
@@ -149,7 +155,7 @@ abstract class Assertion
      * @param string $message
      * @throws \AssertionError if the assertion failed
      */
-    public static function assertPdf($path, $message = '')
+    public static function assertPdf($path, $message = ''): void
     {
         if (!file_exists($path)) {
             throw new \RuntimeException(sprintf('Path "%s" does not exist', $path));
@@ -173,37 +179,36 @@ abstract class Assertion
      * @param string $path
      * @return string
      */
-    protected static function extractTextFromPdf($path)
+    protected static function extractTextFromPdf(string $path): string
     {
         static::assertPdf($path);
 
-        $tempFile = tempnam(sys_get_temp_dir(), 'IWR') . '.txt';
-        static::executeCommand('gs', '-sDEVICE=txtwrite', '-o', $tempFile, $path);
+        $command = 'gs';
+        exec(
+            implode(' ', [
+                $command,
+                '-sDEVICE=txtwrite',
+                '-o',
+                '-',
+                escapeshellarg($path),
+            ]),
+            $allOutput,
+            $result
+        );
 
-        return file_get_contents($tempFile);
-    }
-
-    /**
-     * Executes a shell command and returns the output as array of lines
-     *
-     * @param string     $command
-     * @param string|int ...$arguments
-     * @return string[]
-     * @throws \RuntimeException if the exit code is non-zero
-     */
-    protected static function executeCommand($command, ...$arguments)
-    {
-        $arguments = array_map('escapeshellarg', $arguments);
-        array_unshift($arguments, $command);
-
-        exec(implode(' ', $arguments), $output, $result);
+        $output = array_splice($allOutput, 5);
 
         if ($result !== 0) {
             throw new \RuntimeException(
-                sprintf('Command "%s" terminated with exit code %d: %s', $command, $result, implode(PHP_EOL, $output))
+                sprintf(
+                    'Command "%s" terminated with exit code %d: %s',
+                    $command,
+                    $result,
+                    implode(PHP_EOL, $allOutput)
+                )
             );
         }
 
-        return $output;
+        return implode(PHP_EOL, $output);
     }
 }

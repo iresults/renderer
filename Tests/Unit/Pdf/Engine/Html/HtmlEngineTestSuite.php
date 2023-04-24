@@ -58,7 +58,7 @@ trait HtmlEngineTestSuite
         $configureEngine = $configureEngine ?: function () {
         };
 
-        // Generate the PDF from the given HTML body
+        // Generate the PDF from the given HTML body and check assertions
         $pathFromHtmlBody = $this->pdfWithTextsCount(
             $texts,
             function (HtmlInterface $engine, $pdfPath) use ($configureEngine, $body) {
@@ -67,7 +67,7 @@ trait HtmlEngineTestSuite
             }
         );
 
-        // Generate the PDF from the template file
+        // Generate the PDF from the template file and check assertions
         $templatePath = $this->getTempPath();
         file_put_contents($templatePath, $body);
 
@@ -120,7 +120,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateSinglePagePdfTest()
+    public function generateSinglePagePdfTest(): void
     {
         $text = 'This is the testing text that should be written in the PDF';
 
@@ -133,7 +133,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateMultiPagePdfTest()
+    public function generateMultiPagePdfTest(): void
     {
         $page1 = 'This is the testing text that should be written in the PDF on page 1';
         $page2 = 'This should be written on page 2';
@@ -147,7 +147,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateMultiPagePdfWithHeaderTest()
+    public function generateMultiPagePdfWithHeaderTest(): void
     {
         $header = 'This is the header';
 
@@ -166,7 +166,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateMultiPagePdfWithFooterTest()
+    public function generateMultiPagePdfWithFooterTest(): void
     {
         $footer = 'This is the footer';
 
@@ -185,7 +185,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateMultiPagePdfWithInlineHeaderTest()
+    public function generateMultiPagePdfWithInlineHeaderTest(): void
     {
         $header = 'This is the header';
         $this->pdfWithTextsCountAndBody([$header => 4], $this->getLongMultiPageBodyWithHeader($header));
@@ -194,7 +194,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generateMultiPagePdfWithInlineHeaderAndCustomContextTest()
+    public function generateMultiPagePdfWithInlineHeaderAndCustomContextTest(): void
     {
         $header = 'This is the header';
 
@@ -210,7 +210,7 @@ trait HtmlEngineTestSuite
     /**
      * @test
      */
-    public function generatePdfWithCustomFontTest()
+    public function generatePdfWithCustomFontTest(): void
     {
         // DejaVuSerif
 
@@ -242,7 +242,7 @@ BODY;
     /**
      * @test
      */
-    public function generatePdfWithCustomContextAndFontTest()
+    public function generatePdfWithCustomContextAndFontTest(): void
     {
         $body = /** @lang html */
             <<<BODY
@@ -273,7 +273,7 @@ BODY;
     /**
      * @test
      */
-    public function generateMultiPagePdfWithInlineHeaderAndCustomContextAndFontTest()
+    public function generateMultiPagePdfWithInlineHeaderAndCustomContextAndFontTest(): void
     {
         $header = 'This is the header';
 
@@ -298,7 +298,7 @@ BODY;
     /**
      * @test
      */
-    public function generateMultiPagePdfWithLongTextTest()
+    public function generateMultiPagePdfWithLongTextTest(): void
     {
         $footer = 'This is the footer';
         $this->pdfWithTextsCountAndBody(
@@ -313,7 +313,7 @@ BODY;
     /**
      * @test
      */
-    public function generatePdfWithLongTextAndManualPageBreakTest()
+    public function generatePdfWithLongTextAndManualPageBreakTest(): void
     {
         $header = 'This is the header';
         $footer = 'This is the footer';
@@ -335,7 +335,7 @@ BODY;
     /**
      * @test
      */
-    public function generatePdfWithLongTextAndManualPageBreakAndStylesTest()
+    public function generatePdfWithLongTextAndManualPageBreakAndStylesTest(): void
     {
         $header = 'This is the header';
         $footer = 'This is the footer';
@@ -369,7 +369,7 @@ BODY;
      * @param string $defaultFont
      * @return MpdfWrapperInterface
      */
-    protected function getContext($defaultFont = '')
+    protected function getContext($defaultFont = ''): MpdfWrapperInterface
     {
         $factory = new MpdfWrapperFactory();
 
@@ -413,7 +413,7 @@ BODY;
     /**
      * @return string
      */
-    protected function getLongBodyText()
+    protected function getLongBodyText(): string
     {
         return file_get_contents(__DIR__ . '/../../../../Resources/text.txt');
     }
@@ -421,7 +421,7 @@ BODY;
     /**
      * @return string
      */
-    protected function getLongBodyTextHtml()
+    protected function getLongBodyTextHtml(): string
     {
         return nl2br($this->getLongBodyText());
     }
@@ -430,7 +430,7 @@ BODY;
      * @param $header
      * @return string
      */
-    private function getLongMultiPageBodyWithHeader($header)
+    private function getLongMultiPageBodyWithHeader($header): string
     {
         return /** @lang html */
             <<<BODY
