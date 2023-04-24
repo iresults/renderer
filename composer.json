@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^7.2",
+        "php": "^7.2 || ^8.0",
         "iresults/core": "^3.2"
     },
     "autoload": {
@@ -35,7 +35,7 @@
     "require-dev": {
         "ext-fileinfo": "*",
         "phpunit/phpunit": "^9.5",
-        "cundd/test-flight": "^0.2.6",
+        "cundd/test-flight": "^0.3.0",
         "mpdf/mpdf": "^8.0"
     }
 }
