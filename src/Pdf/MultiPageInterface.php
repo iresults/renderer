@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf;
@@ -10,8 +11,6 @@ interface MultiPageInterface
 {
     /**
      * Return the current page number
-     *
-     * @return int
      */
     public function getPageNumber(): int;
 
@@ -36,7 +35,7 @@ interface MultiPageInterface
     /**
      * Attempt to acquire a page break lock and immediately return if the attempt was successful
      *
-     * @return boolean Returns if the lock could be acquired
+     * @return bool Returns if the lock could be acquired
      */
     public function tryLockPageBreak(): bool;
 

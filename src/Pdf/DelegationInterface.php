@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf;
@@ -14,21 +15,17 @@ interface DelegationInterface
      * @param string      $method    The name of the method to invoke
      * @param array       $arguments Optional arguments to pass to the object
      * @param object|null $object    Optional object to be checked first
-     * @return    mixed
      */
     public function callMethodIfExists(string $method, array $arguments = [], ?object $object = null);
 
     /**
      * Return the delegate
-     *
-     * @return    object
      */
     public function getDelegate(): object;
 
     /**
      * Set a new delegate
      *
-     * @param object $delegate
      * @return void
      */
     public function setDelegate(object $delegate);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Helpers;
@@ -15,7 +16,7 @@ abstract class ObjectBuilder
      *
      * @param string $className            Name of the class to create an instance of
      * @param array  $constructorArguments Optional arguments to pass to the constructor
-     * @return object
+     *
      * @throws UnexpectedValueException if no implementation was found
      */
     public static function createInstance(string $className, array $constructorArguments = []): object

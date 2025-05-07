@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
@@ -15,15 +16,13 @@ interface MpdfWrapperInterface
 {
     /**
      * Add a directory where fonts are stored in
-     *
-     * @param string $fontDirectoryPath
-     * @return MpdfWrapperInterface
      */
     public function addFontDirectoryPath(string $fontDirectoryPath): MpdfWrapperInterface;
 
     /**
      * @param string|scalar $html
      * @param int           $mode See \Mpdf\HTMLParserMode
+     *
      * @return void
      */
     public function writeHtml($html, int $mode = 0);
@@ -42,9 +41,7 @@ interface MpdfWrapperInterface
      *    ),
      * )
      *
-     * @param array $fontDataCollection
-     * @return MpdfWrapperInterface
-     * @throws Exception if an entry in the collection is invalid
+     * @throws Exception                if an entry in the collection is invalid
      * @throws InvalidFontNameException if the font name is not lower case
      */
     public function registerFonts(array $fontDataCollection): MpdfWrapperInterface;
@@ -61,9 +58,6 @@ interface MpdfWrapperInterface
      *    'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
      * )
      *
-     * @param string $fontName
-     * @param array  $fontData
-     * @return MpdfWrapperInterface
      * @throws InvalidFontNameException if the font name is not lower case
      */
     public function registerFont(string $fontName, array $fontData): MpdfWrapperInterface;

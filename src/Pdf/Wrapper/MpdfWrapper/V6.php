@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
@@ -8,6 +9,7 @@ use Iresults\Renderer\Exception;
 use Iresults\Renderer\Pdf\Wrapper\Exception\InvalidFontNameException;
 use Iresults\Renderer\Pdf\Wrapper\Exception\InvalidFontPathException;
 use mPDF as BaseMpdf;
+use otl;
 use TTFontFile;
 
 /**
@@ -15,7 +17,6 @@ use TTFontFile;
  *
  * @property       $fontdata
  * @property array $available_unifonts
- * @package Iresults\Renderer\Pdf\Wrapper
  */
 class V6 extends BaseMpdf implements MpdfWrapperInterface
 {
@@ -37,7 +38,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         _MPDF_TTFONTPATH,
     ];
 
-    function __construct(
+    public function __construct(
         $mode = '',
         $format = 'A4',
         $default_font_size = 0,
@@ -48,7 +49,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         $mgb = 16,
         $mgh = 9,
         $mgf = 9,
-        $orientation = 'P'
+        $orientation = 'P',
     ) {
         $this->_initializeLibrary();
 
@@ -99,7 +100,6 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
      * Sets the paths to directories where fonts are stored in
      *
      * @param string[] $fontDirectoryPaths
-     * @return MpdfWrapperInterface
      */
     public function setFontDirectoryPaths(array $fontDirectoryPaths): MpdfWrapperInterface
     {
@@ -110,13 +110,10 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
 
     /**
      * Adds a directory where fonts are stored in
-     *
-     * @param string $fontDirectoryPath
-     * @return MpdfWrapperInterface
      */
     public function addFontDirectoryPath(string $fontDirectoryPath): MpdfWrapperInterface
     {
-        if (substr($fontDirectoryPath, -1) !== '/') {
+        if ('/' !== substr($fontDirectoryPath, -1)) {
             $fontDirectoryPath .= '/';
         }
         $this->fontDirectoryPaths[] = $fontDirectoryPath;
@@ -128,6 +125,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
      * Throws an exception
      *
      * @param string $msg
+     *
      * @throws WrapperException
      */
     public function throwException($msg)
@@ -149,9 +147,9 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
      *    ),
      * )
      *
-     * @param array $fontDataCollection
      * @return $this
-     * @throws Exception if an entry in the collection is invalid
+     *
+     * @throws Exception                if an entry in the collection is invalid
      * @throws InvalidFontNameException if the font name is not lower case
      */
     public function registerFonts(array $fontDataCollection): MpdfWrapperInterface
@@ -203,9 +201,6 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
      *    'BI' => "DejaVuSansCondensed-BoldOblique.ttf",
      * )
      *
-     * @param string $fontName
-     * @param array  $fontData
-     * @return MpdfWrapperInterface
      * @throws InvalidFontNameException if the font name is not lower case
      */
     public function registerFont(string $fontName, array $fontData): MpdfWrapperInterface
@@ -220,9 +215,10 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
     /**
      * Validates the given font data
      *
-     * @param array $fontData Font data to validate
-     * @param array     <mixed> $error Reference to be filled with the error
-     * @return boolean Returns if the data is valid
+     * @param array             $fontData Font data to validate
+     * @param array     <mixed> $error    Reference to be filled with the error
+     *
+     * @return bool Returns if the data is valid
      */
     public function validateFontData(array $fontData, &$error = null): bool
     {
@@ -230,7 +226,8 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
             if (!$this->getPathForFont($fontFileName)) {
                 $allFontDirectories = implode(', ', $this->getFontDirectoryPaths());
                 $error = new InvalidFontPathException(
-                    sprintf('Font file "%s" not found in %s', $fontFileName, $allFontDirectories), 1392640103
+                    sprintf('Font file "%s" not found in %s', $fontFileName, $allFontDirectories),
+                    1392640103
                 );
 
                 return false;
@@ -242,9 +239,6 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
 
     /**
      * Returns the path to the given font or NULL if it is not found
-     *
-     * @param string $fontFileName
-     * @return string|NULL
      */
     public function getPathForFont(string $fontFileName): ?string
     {
@@ -283,7 +277,6 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         }
     }
 
-
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
     // OVERWRITES
     // MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM
@@ -292,12 +285,12 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
      *
      * @param string $msg
      */
-    function Error($msg)
+    public function Error($msg)
     {
         $this->throwException($msg);
     }
 
-    function AddFont($family, $style = '')
+    public function AddFont($family, $style = '')
     {
         if (empty($family)) {
             return;
@@ -305,7 +298,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         $family = strtolower($family);
         $style = strtoupper($style);
         $style = str_replace('U', '', $style);
-        if ($style == 'IB') {
+        if ('IB' == $style) {
             $style = 'BI';
         }
         $fontkey = $family . $style;
@@ -317,7 +310,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         /* -- CJK-FONTS -- */
         if (in_array($family, $this->available_CJK_fonts)) {
             if (empty($this->Big5_widths)) {
-                require(_MPDF_PATH . 'includes/CJKdata.php');
+                require _MPDF_PATH . 'includes/CJKdata.php';
             }
             $this->AddCJKFont($family); // don't need to add style
 
@@ -326,7 +319,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         /* -- END CJK-FONTS -- */
 
         if ($this->usingCoreFont) {
-            throw new MpdfException("mPDF Error - problem with Font management");
+            throw new MpdfException('mPDF Error - problem with Font management');
         }
 
         $stylekey = $style;
@@ -355,7 +348,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         $GPOSFeatures = [];
         $GPOSLookups = [];
         if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php')) {
-            include(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php');
+            include _MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php';
         }
 
         $ttffile = '';
@@ -368,7 +361,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         if (!$ttffile) {
             $ttffile = $this->getPathForFont($this->fontdata[$family][$stylekey]);
             if (!file_exists($ttffile)) {
-                throw new MpdfException("mPDF Error - cannot find TTF TrueType font file - " . $ttffile);
+                throw new MpdfException('mPDF Error - cannot find TTF TrueType font file - ' . $ttffile);
             }
         }
         $ttfstat = stat($ttffile);
@@ -402,7 +395,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         } // mPDF 6
         if (!isset($name) || $originalsize != $ttfstat['size'] || $regenerate) {
             if (!class_exists('TTFontFile', false)) {
-                include(_MPDF_PATH . 'classes/ttfontsuni.php');
+                include _MPDF_PATH . 'classes/ttfontsuni.php';
             }
             $ttf = new TTFontFile();
             $ttf->getMetrics($ttffile, $fontkey, $TTCfontID, $this->debugfonts, $BMPonly, $useOTL); // mPDF 5.7.1
@@ -427,11 +420,11 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
             $glyphIDtoUni = $ttf->glyphIDtoUni;
 
             $desc = [
-                'CapHeight'    => round($ttf->capHeight),
-                'XHeight'      => round($ttf->xHeight),
-                'FontBBox'     => '[' . round($ttf->bbox[0]) . " " . round($ttf->bbox[1]) . " " . round(
-                        $ttf->bbox[2]
-                    ) . " " . round($ttf->bbox[3]) . ']',
+                'CapHeight' => round($ttf->capHeight),
+                'XHeight'   => round($ttf->xHeight),
+                'FontBBox'  => '[' . round($ttf->bbox[0]) . ' ' . round($ttf->bbox[1]) . ' ' . round(
+                    $ttf->bbox[2]
+                ) . ' ' . round($ttf->bbox[3]) . ']',
                 /* FontBBox from head table */
 
                 /* 		'MaxWidth' => round($ttf->advanceWidthMax),	// AdvanceWidthMax from hhea table	NB ArialUnicode MS = 31990 ! */
@@ -457,7 +450,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
             $strs = round($ttf->strikeoutSize); // mPDF 6
             $originalsize = $ttfstat['size'] + 0;
             $type = 'TTF';
-            //Generate metrics .php file
+            // Generate metrics .php file
             $s = '<?php' . "\n";
             $s .= '$name=\'' . $name . "';\n";
             $s .= '$type=\'' . $type . "';\n";
@@ -505,14 +498,14 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
             $s .= '$fontmetrics=\'' . _FONT_DESCRIPTOR . "';\n"; // mPDF 6
 
             $s .= '// TypoAscender/TypoDescender/TypoLineGap = ' . round($ttf->typoAscender) . ', ' . round(
-                    $ttf->typoDescender
-                ) . ', ' . round($ttf->typoLineGap) . "\n";
+                $ttf->typoDescender
+            ) . ', ' . round($ttf->typoLineGap) . "\n";
             $s .= '// usWinAscent/usWinDescent = ' . round($ttf->usWinAscent) . ', ' . round(
-                    -$ttf->usWinDescent
-                ) . "\n";
+                -$ttf->usWinDescent
+            ) . "\n";
             $s .= '// hhea Ascent/Descent/LineGap = ' . round($ttf->hheaascent) . ', ' . round(
-                    $ttf->hheadescent
-                ) . ', ' . round($ttf->hhealineGap) . "\n";
+                $ttf->hheadescent
+            ) . ', ' . round($ttf->hhealineGap) . "\n";
 
             //  mPDF 5.7.1
             if (isset($this->fontdata[$family]['useOTL'])) {
@@ -546,16 +539,16 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
             if ($kerninfo) {
                 $s .= '$kerninfo=' . var_export($kerninfo, true) . ";\n";
             }
-            $s .= "?>";
+            $s .= '?>';
             if (is_writable(dirname(_MPDF_TTFONTDATAPATH . 'x'))) {
-                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php', "w");
+                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.mtx.php', 'w');
                 fwrite($fh, $s, strlen($s));
                 fclose($fh);
-                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat', "wb");
+                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.cw.dat', 'wb');
                 fwrite($fh, $cw, strlen($cw));
                 fclose($fh);
                 // mPDF 5.7.1
-                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat', "wb");
+                $fh = fopen(_MPDF_TTFONTDATAPATH . $fontkey . '.gid.dat', 'wb');
                 fwrite($fh, $glyphIDtoUni, strlen($glyphIDtoUni));
                 fclose($fh);
                 if (file_exists(_MPDF_TTFONTDATAPATH . $fontkey . '.cgm')) {
@@ -590,10 +583,10 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         // Use OTL OpenType Table Layout - GSUB
         if (isset($this->fontdata[$family]['useOTL']) && ($this->fontdata[$family]['useOTL'])) {
             if (!class_exists('otl', false)) {
-                include(_MPDF_PATH . 'classes/otl.php');
+                include _MPDF_PATH . 'classes/otl.php';
             }
             if (empty($this->otl)) {
-                $this->otl = new \otl($this);
+                $this->otl = new otl($this);
             }
         }
         /* -- END OTL -- */
@@ -654,7 +647,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
             ]; // mPDF 5.7.1	// mPDF 6
         } else {
             $ss = [];
-            for ($s = 32; $s < 128; $s++) {
+            for ($s = 32; $s < 128; ++$s) {
                 $ss[$s] = $s;
             }
             $this->fonts[$fontkey] = [
@@ -697,7 +690,7 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         }
         $this->FontFiles[$fontkey] = [
             'length1' => $originalsize,
-            'type'    => "TTF",
+            'type'    => 'TTF',
             'ttffile' => $ttffile,
             'sip'     => $sip,
             'smp'     => $smp,
@@ -705,4 +698,3 @@ class V6 extends BaseMpdf implements MpdfWrapperInterface
         unset($cw);
     }
 }
-

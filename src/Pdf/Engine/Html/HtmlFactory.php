@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Engine\Html;
 
 use Iresults\Renderer\Helpers\ObjectBuilder;
 use UnexpectedValueException;
+
 use function class_exists;
 use function get_called_class;
 
@@ -17,7 +19,6 @@ class HtmlFactory
      * Return a new HTML renderer
      *
      * @param array $constructorArguments Optional arguments to pass to the constructor
-     * @return HtmlInterface
      */
     public static function renderer(array $constructorArguments = []): HtmlInterface
     {
@@ -29,9 +30,6 @@ class HtmlFactory
 
     /**
      * Return a new HTML renderer with the given template
-     *
-     * @param string $template
-     * @return HtmlInterface
      */
     public static function rendererWithTemplate(string $template): HtmlInterface
     {

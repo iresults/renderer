@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Engine\Html;
 
 use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper\MpdfWrapperInterface;
 use Iresults\Renderer\Pdf\Wrapper\MpdfWrapperFactory;
+
 use function is_callable;
 use function property_exists;
 
@@ -13,7 +15,7 @@ class MpdfHtml extends AbstractHtml
     /**
      * Render the PDF
      */
-    protected function _render()
+    protected function _render(): void
     {
         $this->getContext()->WriteHTML($this->getStyles(), 1);
         $this->getContext()->WriteHTML($this->getTemplate(), 2);

@@ -1,37 +1,38 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf;
 
 use Iresults\Renderer\AbstractRenderer;
+use Traversable;
 
 abstract class AbstractPdfRenderer extends AbstractRenderer
 {
     /**
-     * @var string The orientation of the PDF pages.
+     * @var string the orientation of the PDF pages
      */
     protected $orientation = 'P';
 
     /**
-     * @var string The unit the PDF pages are messured.
+     * @var string the unit the PDF pages are messured
      */
     protected $unit = 'mm';
 
     /**
-     * @var string The page format of the PDF.
+     * @var string the page format of the PDF
      */
     protected $format = 'A4';
 
     /**
-     * @var object The PDF object.
+     * @var object the PDF object
      */
-    protected $pdf = null;
+    protected $pdf;
 
     /**
      * The constructor
      *
-     * @param array $parameters
-     * @return \Iresults\Renderer\Pdf\AbstractPdfRenderer
+     * @return AbstractPdfRenderer
      */
     public function __construct(array $parameters = [])
     {
@@ -53,21 +54,22 @@ abstract class AbstractPdfRenderer extends AbstractRenderer
      * Split the text by the occurrence of new line characters
      *
      * @param string $text The text to split
-     * @return string[]    An array of split text parts, or an array containing the given text as it's only element
+     *
+     * @return string[] An array of split text parts, or an array containing the given text as it's only element
      */
     public static function splitText(string $text): array
     {
-        if (strpos($text, "\r\n") !== false) {
+        if (false !== strpos($text, "\r\n")) {
             $textPieces = explode("\r\n", $text);
-        } elseif (strpos($text, "\n") !== false) {
+        } elseif (false !== strpos($text, "\n")) {
             $textPieces = explode("\n", $text);
-        } elseif (strpos($text, "\r") !== false) {
+        } elseif (false !== strpos($text, "\r")) {
             $textPieces = explode("\r", $text);
-        } elseif (strpos($text, '\r\n') !== false) {
+        } elseif (false !== strpos($text, '\r\n')) {
             $textPieces = explode('\r\n', $text);
-        } elseif (strpos($text, '\r') !== false) {
+        } elseif (false !== strpos($text, '\r')) {
             $textPieces = explode('\r', $text);
-        } elseif (strpos($text, '\n') !== false) {
+        } elseif (false !== strpos($text, '\n')) {
             $textPieces = explode('\n', $text);
         } else {
             $textPieces = [$text];
@@ -81,25 +83,26 @@ abstract class AbstractPdfRenderer extends AbstractRenderer
      *
      * If the input is a string it will be split using `self::splitText`.
      *
-     * @param object       $that     The object that will respond to GetStringWidth() if the width of the string should be computed
-     * @param string|array $input    The input to get the longest part of
-     * @param string       $info     The information to fetch. Pass one of the following:
-     *                               - 'width' fetches the width of the string according to the current font settings of the object passed in $that
-     *                               - 'count' fetches the number of characters
-     *                               - 'part' fetches and returns the longest part
-     *                               - 'all' fetches all the information and returns it in an array
-     * @return mixed    The result according to the passed $info-value
+     * @param object       $that  The object that will respond to GetStringWidth() if the width of the string should be computed
+     * @param string|array $input The input to get the longest part of
+     * @param string       $info  The information to fetch. Pass one of the following:
+     *                            - 'width' fetches the width of the string according to the current font settings of the object passed in $that
+     *                            - 'count' fetches the number of characters
+     *                            - 'part' fetches and returns the longest part
+     *                            - 'all' fetches all the information and returns it in an array
+     *
+     * @return mixed The result according to the passed $info-value
      */
     public static function getLongestPartOfSplitText(object $that, $input, string $info = 'width')
     {
-        if (!is_array($input) || $input instanceof \Traversable) {
+        if (!is_array($input) || $input instanceof Traversable) {
             $input = self::splitText($input);
         }
 
         $longest = '';
         $longestLength = 0;
 
-        /**
+        /*
          * Determine the longest part.
          */
         foreach ($input as $part) {

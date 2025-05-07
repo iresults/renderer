@@ -1,9 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Wrapper\MpdfWrapper;
 
 use Iresults\Renderer\Pdf\Wrapper\Exception\InvalidFontNameException;
+
 use function func_get_args;
 use function is_array;
 
@@ -18,7 +20,6 @@ class V8 extends \Mpdf\Mpdf implements MpdfWrapperInterface
      * @var MpdfConstructorConfiguration
      */
     protected $overwriteDefaults = [
-
     ];
 
     /**
@@ -33,7 +34,9 @@ class V8 extends \Mpdf\Mpdf implements MpdfWrapperInterface
      * @param int                                 $mgh
      * @param int                                 $mgf
      * @param string                              $orientation
+     *
      * @throws \Mpdf\MpdfException
+     *
      * @noinspection PhpMissingParamTypeInspection
      */
     public function __construct(
@@ -47,7 +50,7 @@ class V8 extends \Mpdf\Mpdf implements MpdfWrapperInterface
         $mgb = 16,
         $mgh = 9,
         $mgf = 9,
-        $orientation = 'P'
+        $orientation = 'P',
     ) {
         parent::__construct(is_array($config) ? $config : func_get_args());
 
@@ -58,7 +61,7 @@ class V8 extends \Mpdf\Mpdf implements MpdfWrapperInterface
 
     public function addFontDirectoryPath(string $fontDirectoryPath): MpdfWrapperInterface
     {
-        if (substr($fontDirectoryPath, -1) !== '/') {
+        if ('/' !== substr($fontDirectoryPath, -1)) {
             $fontDirectoryPath .= '/';
         }
 
@@ -117,4 +120,3 @@ class V8 extends \Mpdf\Mpdf implements MpdfWrapperInterface
         }
     }
 }
-

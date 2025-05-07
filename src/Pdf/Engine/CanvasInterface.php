@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Engine;
@@ -13,8 +14,6 @@ interface CanvasInterface
     /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
     /**
      * Set the fill style
-     *
-     * @param string $value
      */
     public function fillStyle(string $value);
 
@@ -22,15 +21,11 @@ interface CanvasInterface
      * Set the stroke style
      *
      * Currently, only RGB color settings are allowed.
-     *
-     * @param string $value
      */
     public function strokeStyle(string $value);
 
     /**
      * Set the width of the stroke of the next stroke() call
-     *
-     * @param float $width
      */
     public function lineWidth(float $width);
 
@@ -56,7 +51,7 @@ interface CanvasInterface
         string $align = 'L',
         $translationPara1 = null,
         $translationPara2 = null,
-        $translationPara3 = null
+        $translationPara3 = null,
     );
 
     /**
@@ -67,21 +62,19 @@ interface CanvasInterface
      * @param float  $y      The image's y offset
      * @param float  $width  The image's width
      * @param float  $height The image's height
-     * @return    void
+     *
+     * @return void
      */
     public function drawImage(
         string $image,
         float $x = -1.0,
         float $y = -1.0,
         float $width = -1.0,
-        float $height = -1.0
+        float $height = -1.0,
     );
 
     /**
      * Draw a line to the point ($x,$y)
-     *
-     * @param float $x
-     * @param float $y
      */
     public function lineTo(float $x, float $y);
 
@@ -107,9 +100,6 @@ interface CanvasInterface
 
     /**
      * Move the current point to the given position
-     *
-     * @param float $newX
-     * @param float $newY
      */
     public function moveTo(float $newX, float $newY);
 
@@ -125,8 +115,6 @@ interface CanvasInterface
      */
     public function restoreContext();
 
-
-
     /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
     /* FONTS             MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
     /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
@@ -134,8 +122,6 @@ interface CanvasInterface
      * Set the font to use to the described font
      *
      * The parameter has to be in the format "8.0px 'Helvetica'" or "Bold 8.0px 'Verdana'"
-     *
-     * @param string $fontText
      */
     public function font(string $fontText);
 
@@ -143,15 +129,11 @@ interface CanvasInterface
      * Set the line height of multiline text
      *
      * The font line height is applied as a factor.
-     *
-     * @param float $fontLineHeight
      */
     public function setFontLineHeight(float $fontLineHeight);
 
     /**
      * Return the font line height
-     *
-     * @return float
      */
     public function getFontLineHeight(): float;
 
@@ -160,25 +142,16 @@ interface CanvasInterface
     /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
     /**
      * Apply a canvas to PDF scale value
-     *
-     * @param float $input
-     * @return float
      */
     public function _applyCanvasToPdfScale(float $input): float;
 
     /**
      * Apply a PDF to canvas scale value
-     *
-     * @param float $input
-     * @return float
      */
     public function _applyPdfToCanvasScale(float $input): float;
 
     /**
      * Translate the given y value into the flipped PDF value
-     *
-     * @param float $y
-     * @return float
      */
     public function _yToCoordinateSystem(float $y): float;
 
@@ -188,19 +161,11 @@ interface CanvasInterface
      *     originalX + widthToAlignRight------------------------------
      *
      *     ---------------------->alignedX -------------------textWidth
-     *
-     * @param string $text
-     * @param float  $originalX
-     * @param float  $widthToAlignRight
-     * @return float
      */
     public function _getXAlignedRightToWidth(string $text, float $originalX, float $widthToAlignRight): float;
 
     /**
      * Calculate the width of a given text in the current font and font-size
-     *
-     * @param string $text
-     * @return float
      */
     public function _getTextWidth(string $text): float;
 }

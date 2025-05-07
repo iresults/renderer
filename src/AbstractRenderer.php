@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer;
@@ -12,28 +13,26 @@ use Iresults\Renderer\Pdf\Wrapper\MpdfWrapper\MpdfWrapperInterface;
 abstract class AbstractRenderer extends Model implements RendererInterface
 {
     /**
-     * @var string The path the file will be saved.
+     * @var string the path the file will be saved
      */
-    protected $savePath = '';
+    protected string $savePath = '';
 
     /**
      * The underlying object responsible for rendering
      *
      * @var object|MpdfWrapperInterface
      */
-    protected $driver = null;
+    protected object $driver;
 
     /**
      * The current context of the rendering (i.e. a mPDF wrapper)
      *
      * @var object|MpdfWrapperInterface
      */
-    protected $context = null;
+    protected object $context;
 
     /**
      * The constructor
-     *
-     * @param array $parameters
      */
     public function __construct(array $parameters = [])
     {
@@ -44,14 +43,11 @@ abstract class AbstractRenderer extends Model implements RendererInterface
         $this->initializeDriver();
     }
 
-    /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    /* FACTORY METHODS           MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
+    /* ========================================================================= */
+    /* FACTORY METHODS           =============================================== */
+    /* ========================================================================= */
     /**
      * Create a new instance with the given template file path
-     *
-     * @param string $templateFilePath
-     * @return RendererInterface
      */
     public static function rendererWithTemplate(string $templateFilePath): RendererInterface
     {
@@ -60,11 +56,10 @@ abstract class AbstractRenderer extends Model implements RendererInterface
         return $renderer->initWithTemplate($templateFilePath);
     }
 
-
-    /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    /* COMMON RENDERER METHODS   MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    public function save(string $savePath = '', string $type = null): void
+    /* ========================================================================= */
+    /* COMMON RENDERER METHODS   =============================================== */
+    /* ========================================================================= */
+    public function save(string $savePath = '', ?string $type = null): void
     {
         if (!$savePath) {
             $savePath = $this->getSavePath();
@@ -74,7 +69,7 @@ abstract class AbstractRenderer extends Model implements RendererInterface
         $writer->save($savePath);
     }
 
-    public function output(string $name = '', string $type = null): void
+    public function output(string $name = '', ?string $type = null): void
     {
         if (!$name) {
             $name = basename($this->getSavePath());
@@ -86,7 +81,7 @@ abstract class AbstractRenderer extends Model implements RendererInterface
         $writer->save('php://output');
     }
 
-    public function outputAndExit(string $name = '', string $type = null): void
+    public function outputAndExit(string $name = '', ?string $type = null): void
     {
         $this->output($name, $type);
 
@@ -132,7 +127,6 @@ abstract class AbstractRenderer extends Model implements RendererInterface
      *
      * @param string $name      The originally called method
      * @param array  $arguments The arguments passed to the original method
-     * @return mixed
      */
     public function __call($name, array $arguments)
     {
@@ -146,10 +140,9 @@ abstract class AbstractRenderer extends Model implements RendererInterface
         return parent::__call($name, $arguments);
     }
 
-
-    /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    /* DRIVER SPECIFIC METHODS   MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
-    /* MWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWMWM */
+    /* ========================================================================= */
+    /* DRIVER SPECIFIC METHODS   =============================================== */
+    /* ========================================================================= */
     /**
      * Create and prepare the driver instance
      *
@@ -161,15 +154,11 @@ abstract class AbstractRenderer extends Model implements RendererInterface
      * Return a new writer instance
      *
      * @param string|null $type The type of the writer
-     * @return object
      */
-    abstract public function createWriter(string $type = null): object;
+    abstract public function createWriter(?string $type = null): object;
 
     /**
      * Initialize a new instance with the given template file path
-     *
-     * @param string $templateFilePath
-     * @return RendererInterface
      */
     abstract public function initWithTemplate(string $templateFilePath): RendererInterface;
 
@@ -178,9 +167,8 @@ abstract class AbstractRenderer extends Model implements RendererInterface
      *
      * @param string      $name This appears as the name of the downloaded file
      * @param string|null $type Type for which to send the header
-     * @return void
      */
-    public function sendHeaders(string $name, string $type = null): void
+    public function sendHeaders(string $name, ?string $type = null): void
     {
     }
 }

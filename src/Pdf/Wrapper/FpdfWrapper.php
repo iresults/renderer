@@ -1,17 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Wrapper;
 
+use FPDF;
+
 /**
  * Wrapper class for the FPDF library
  */
-class FpdfWrapper extends \FPDF
+class FpdfWrapper extends FPDF
 {
     /**
      * Throws an exception
      *
      * @param string $msg
+     *
      * @throws WrapperException
      */
     public function throwException($msg)
@@ -26,11 +30,11 @@ class FpdfWrapper extends \FPDF
      * Throws an exception instead of terminating the script on error
      *
      * @param string $msg
+     *
      * @throws WrapperException
      */
-    function Error($msg)
+    public function Error($msg)
     {
         $this->throwException($msg);
     }
 }
-

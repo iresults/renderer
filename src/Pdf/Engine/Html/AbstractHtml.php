@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Iresults\Renderer\Pdf\Engine\Html;
@@ -51,15 +52,13 @@ abstract class AbstractHtml implements HtmlInterface
 
     /**
      * Defines if the template needs to be rendered
-     *
-     * @var bool
      */
-    protected $_needsToRender = true;
+    protected bool $_needsToRender = true;
 
     /**
      * Render the PDF
      */
-    abstract protected function _render();
+    abstract protected function _render(): void;
 
     public function initWithTemplate(string $templatePath): HtmlInterface
     {
@@ -68,7 +67,7 @@ abstract class AbstractHtml implements HtmlInterface
         return $this;
     }
 
-    public function save(string $savePath = '', string $type = null): void
+    public function save(string $savePath = '', ?string $type = null): void
     {
         if (!$savePath) {
             $savePath = $this->getSavePath();
@@ -80,7 +79,7 @@ abstract class AbstractHtml implements HtmlInterface
         $this->getContext()->Output($savePath, 'F');
     }
 
-    public function output(string $name = '', string $type = null): void
+    public function output(string $name = '', ?string $type = null): void
     {
         if (!$name) {
             $name = basename($this->getSavePath());
@@ -92,7 +91,7 @@ abstract class AbstractHtml implements HtmlInterface
         $this->getContext()->Output($name, 'D');
     }
 
-    public function outputAndExit(string $name = '', string $type = null): void
+    public function outputAndExit(string $name = '', ?string $type = null): void
     {
         $this->output($name, $type);
 
@@ -129,13 +128,14 @@ abstract class AbstractHtml implements HtmlInterface
 
     public function getTemplate(): string
     {
-        if (!$this->template) {
-            if ($this->templatePath) {
-                return file_get_contents($this->templatePath);
-            }
+        if ($this->template) {
+            return $this->template;
+        }
+        if ($this->templatePath) {
+            return (string) file_get_contents($this->templatePath);
         }
 
-        return $this->template;
+        return '';
     }
 
     public function setTemplate(string $template): HtmlInterface
@@ -151,16 +151,10 @@ abstract class AbstractHtml implements HtmlInterface
         $this->_needsToRender = true;
 
         if (!file_exists($templatePath)) {
-            throw new InvalidPathException(
-                sprintf('Template path "%s" could not be found', $templatePath),
-                1429523757
-            );
+            throw new InvalidPathException(sprintf('Template path "%s" could not be found', $templatePath), 1429523757);
         }
         if (!is_readable($templatePath)) {
-            throw new InvalidPathException(
-                sprintf('Template path "%s" is not readable', $templatePath),
-                1429523758
-            );
+            throw new InvalidPathException(sprintf('Template path "%s" is not readable', $templatePath), 1429523758);
         }
 
         $this->templatePath = $templatePath;
@@ -188,13 +182,15 @@ abstract class AbstractHtml implements HtmlInterface
 
     public function getStyles(): string
     {
-        if (!$this->styles) {
-            if ($this->stylesPath) {
-                return file_get_contents($this->stylesPath);
-            }
+        if ($this->styles) {
+            return $this->styles;
         }
 
-        return $this->styles;
+        if ($this->stylesPath) {
+            return (string) file_get_contents($this->stylesPath);
+        }
+
+        return '';
     }
 
     public function setStylesPath(string $stylesPath): HtmlInterface
@@ -202,16 +198,10 @@ abstract class AbstractHtml implements HtmlInterface
         $this->_needsToRender = true;
 
         if (!file_exists($stylesPath)) {
-            throw new InvalidPathException(
-                sprintf('Styles path "%s" could not be found', $stylesPath),
-                1429523747
-            );
+            throw new InvalidPathException(sprintf('Styles path "%s" could not be found', $stylesPath), 1429523747);
         }
         if (!is_readable($stylesPath)) {
-            throw new InvalidPathException(
-                sprintf('Styles path "%s" is not readable', $stylesPath),
-                1429523748
-            );
+            throw new InvalidPathException(sprintf('Styles path "%s" is not readable', $stylesPath), 1429523748);
         }
         $this->stylesPath = $stylesPath;
 
@@ -226,11 +216,10 @@ abstract class AbstractHtml implements HtmlInterface
     /**
      * Send the headers for direct output of the rendered data.
      *
-     * @param string $name This appears as the name of the downloaded file
-     * @param null   $type Type for which to send the header
-     * @return void
+     * @param string      $name This appears as the name of the downloaded file
+     * @param string|null $type Type for which to send the header
      */
-    public function sendHeaders(string $name, $type = null): void
+    public function sendHeaders(string $name, ?string $type = null): void
     {
         // Will be sent by mPDF
     }
